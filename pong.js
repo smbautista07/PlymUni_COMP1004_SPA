@@ -2,16 +2,16 @@
 
 class displayHandler
 {
-    static displayWidth = 960;
-    static displayHeight = 540;
+    static width = 960;
+    static height = 540;
     static gameCanvas;
     static ctx;
 
-    static createDisplay()
+    static createDisplay({width, height})
     {
         displayHandler.gameCanvas = document.createElement("canvas");
-        displayHandler.gameCanvas.width = displayHandler.displayWidth;
-        displayHandler.gameCanvas.height = displayHandler.displayHeight;
+        displayHandler.gameCanvas.width = displayHandler.width;
+        displayHandler.gameCanvas.height = displayHandler.height;
         displayHandler.gameCanvas.id = "display";
         document.body.appendChild(displayHandler.gameCanvas);
         
@@ -30,12 +30,12 @@ class displayHandler
     
     static getWidth()
     {
-        return displayHandler.displayWidth;
+        return displayHandler.width;
     }
 
     static getHeight()
     {
-        return displayHandler.displayHeight;
+        return displayHandler.height;
     }
 }
 
@@ -47,7 +47,7 @@ class rectangle
         this.width = width;
         this.x = 0;
         this.y = 0;
-        // exampleFunc();
+        // this.exampleFunc();
 
         
 
@@ -83,9 +83,9 @@ class rectangle
 var r;
 function initialise()
 {
-    displayHandler.createDisplay();    
+    displayHandler.createDisplay({width:960, height:540});    
     console.log(displayHandler.getWidth());
-    r = new rectangle({height:20, width:20,x:0,y:0, screenAlignment:"TR"});
+    r = new rectangle({height:20, width:20,x:0,y:0, screenAlignment:"BR"});
     
     displayHandler.drawRect(r);
 }
