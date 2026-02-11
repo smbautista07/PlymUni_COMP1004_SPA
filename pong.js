@@ -47,35 +47,39 @@ class rectangle
         this.width = width;
         this.x = 0;
         this.y = 0;
-        // this.exampleFunc();
 
-        
+        switch (screenAlignment[0])
+        {
+            case "T":
+                break;
+            case "B":
+                y = displayHandler.getHeight() - this.height - y;
+                break;
+            default:
+                console.error("Invalid screenAlignment argument");
+                y = -9999;
+                
+        }
+        switch (screenAlignment[1])
+        {
+            case "L":
+                break;
+            case "R":
+                x = displayHandler.getWidth() - this.width - x;
+                break;
+            default:
+                console.error("Invalid screenAlignment argument");
+                x = -9999;
+        }
 
-
+        this.setPosition({x:x, y:y})
     }
 
-    exampleFunc()
+    setPosition({x,y})
     {
-        console.log("E");
+        this.x = x;
+        this.y = y;
     }
-
-
-    // setPosition({x1=0, y1=0, screenAlignment1="TL"})
-    // {
-    //     var xOffset = 0;
-    //     var yOffset = 0;
-        
-    //     // if (screenAlignment[0] == "B")
-    //     // {
-    //     //     yOffset += displayHandler.getHeight() - this.height;
-    //     // }
-    //     // if (screenAlignment[1] == "R")
-    //     // {
-    //     //     xOffset += displayHandler.getWidth() - this.width;
-    //     // }
-    //     this.x += x1+xOffset;
-    //     this.y += y1+yOffset;
-    
 
 }
 
@@ -85,7 +89,7 @@ function initialise()
 {
     displayHandler.createDisplay({width:960, height:540});    
     console.log(displayHandler.getWidth());
-    r = new rectangle({height:20, width:20,x:0,y:0, screenAlignment:"BR"});
+    r = new rectangle({height:20, width:20,x:50,y:50, screenAlignment: "BR"});
     
     displayHandler.drawRect(r);
 }
