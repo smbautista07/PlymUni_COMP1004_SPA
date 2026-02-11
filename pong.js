@@ -4,29 +4,30 @@ class displayHandler
 {
     static displayWidth = 960;
     static displayHeight = 540;
-    
+    static gameCanvas;
+    static ctx;
 
-    constructor()
+    static createDisplay()
     {
-        this.gameCanvas = document.createElement("canvas");
-        this.gameCanvas.width = displayHandler.displayWidth;
-        this.gameCanvas.height = displayHandler.displayHeight;
-        this.gameCanvas.id = "display";
-        document.body.appendChild(this.gameCanvas);
+        displayHandler.gameCanvas = document.createElement("canvas");
+        displayHandler.gameCanvas.width = displayHandler.displayWidth;
+        displayHandler.gameCanvas.height = displayHandler.displayHeight;
+        displayHandler.gameCanvas.id = "display";
+        document.body.appendChild(displayHandler.gameCanvas);
         
-        this.ctx = this.gameCanvas.getContext("2d");
+        displayHandler.ctx = displayHandler.gameCanvas.getContext("2d");
     }
 
-    drawRect(rect_obj)
+    static drawRect(rect_obj)
     {
-        this.ctx.fillRect(rect_obj.x,rect_obj.y,rect_obj.width,rect_obj.height);
+        displayHandler.ctx.fillRect(rect_obj.x,rect_obj.y,rect_obj.width,rect_obj.height);
     }
 
-    clearRect(rect_obj)
+    static clearRect(rect_obj)
     {
-        this.ctx.clearRect(rect_obj.x,rect_obj.y,rect_obj.width,rect_obj.height);
+        displayHandler.ctx.clearRect(rect_obj.x,rect_obj.y,rect_obj.width,rect_obj.height);
     }
-
+    
     static getWidth()
     {
         return displayHandler.displayWidth;
@@ -40,41 +41,53 @@ class displayHandler
 
 class rectangle
 {
-    constructor({height, width, x, y, selfAlignment="TL", screenAlignment="TL"})
+    constructor({height, width, x, y, screenAlignment="TL"})
     {
         this.height = height;
         this.width = width;
+        this.x = 0;
+        this.y = 0;
+        // exampleFunc();
+
         
-        var xOffset = 0;
-        var yOffset = 0;
 
-        if (screenAlignment[0] == "B")
-        {
-            yOffset += displayHandler.getHeight() - height;
-        }
-        if (screenAlignment[1] == "R")
-        {
-            xOffset += displayHandler.getWidth() - width;
-        }
 
-        this.x = x+xOffset;
-        this.y = y+yOffset;
     }
 
+    exampleFunc()
+    {
+        console.log("E");
+    }
+
+
+    // setPosition({x1=0, y1=0, screenAlignment1="TL"})
+    // {
+    //     var xOffset = 0;
+    //     var yOffset = 0;
+        
+    //     // if (screenAlignment[0] == "B")
+    //     // {
+    //     //     yOffset += displayHandler.getHeight() - this.height;
+    //     // }
+    //     // if (screenAlignment[1] == "R")
+    //     // {
+    //     //     xOffset += displayHandler.getWidth() - this.width;
+    //     // }
+    //     this.x += x1+xOffset;
+    //     this.y += y1+yOffset;
+    
 
 }
 
 
-var pongDisplay;
 var r;
 function initialise()
 {
-    pongDisplay = new displayHandler();
+    displayHandler.createDisplay();    
     console.log(displayHandler.getWidth());
     r = new rectangle({height:20, width:20,x:0,y:0, screenAlignment:"TR"});
     
-    pongDisplay.drawRect(r);
-
+    displayHandler.drawRect(r);
 }
 
 initialise();
