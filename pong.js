@@ -28,14 +28,22 @@ class displayHandler
         displayHandler.ctx.clearRect(rect_obj.x,rect_obj.y,rect_obj.width,rect_obj.height);
     }
     
-    static redrawAll()
+    static drawAll()
     {
         for (const obj of objectHandler.objects)
         {
-            this.clearRect(obj);
-            this.drawRect(obj);
+            displayHandler.drawRect(obj);
         }
     }
+
+    static clearAll()
+    {
+        for (const obj of objectHandler.objects)
+        {
+            displayHandler.clearRect(obj);
+        }
+    }
+
     static getWidth()
     {
         return displayHandler.width;
@@ -55,8 +63,12 @@ class rectangle
         this.width = width;
         var offsetX = 0;
         var offsetY = 0;
-        
+        this.speedX = 0;
+        this.speedY = 0;
+
+
         objectHandler.objects.add(this);
+
 
         if (selfAlignmentX === undefined)
         {
@@ -135,7 +147,29 @@ class objectHandler
 {
     static objects = new Set();
    
+    static positionUpdateAll()
+    {
+        for (const obj of objectHandler.objects)
+        {
+            objectHandler.positionUpdate(obj);
+        }
+    }
 
+    static positionUpdate(obj)
+    {
+        obj.x += obj.speedX;
+        obj.y += obj.speedY;
+    }
+    
+    static outputObj()
+    {
+        for (const obj of objectHandler.objects)
+        {
+            console.log(objectHandler.objects);
+            console.log("Hello");
+        }
+    }
+    
 }
 
 var pongBall;
@@ -149,12 +183,26 @@ function initialise()
     leftPaddle = new rectangle({height:100, width:10, x:50, y:displayHandler.getHeight()/2,selfAlignmentY:"M"});
     rightPaddle = new rectangle({height:100, width:10, x:50, y:displayHandler.getHeight()/2, screenAlignmentX:"R",selfAlignmentY:"M"});
 
-    displayHandler.redrawAll();
+    // displayHandler.redrawAll();
+    pongBall.speedX=10;
+    leftPaddle.speedY=10;
+
+    console.log("Hello");
+
+    // objectHandler.positionUpdate(pongBall);
+    // objectHandler.outputObj();
+    // console.log(objectHandler.objects);
+    setInterval(update, 30);
+    // displayHandler.redrawAll();
 }
+
+
 
 function update()
 {
-    
+    displayHandler.clearAll();
+    objectHandler.positionUpdateAll();
+    displayHandler.drawAll();
 }
 
 initialise();
