@@ -28,6 +28,14 @@ class displayHandler
         displayHandler.ctx.clearRect(rect_obj.x,rect_obj.y,rect_obj.width,rect_obj.height);
     }
     
+    static redrawAll()
+    {
+        for (const obj of objectHandler.objects)
+        {
+            this.clearRect(obj);
+            this.drawRect(obj);
+        }
+    }
     static getWidth()
     {
         return displayHandler.width;
@@ -48,6 +56,8 @@ class rectangle
         var offsetX = 0;
         var offsetY = 0;
         
+        objectHandler.objects.add(this);
+
         if (selfAlignmentX === undefined)
         {
             selfAlignmentX = screenAlignmentX;
@@ -121,6 +131,12 @@ class rectangle
     }
 }
 
+class objectHandler
+{
+    static objects = new Set();
+   
+
+}
 
 var pongBall;
 var leftPaddle;
@@ -133,17 +149,13 @@ function initialise()
     leftPaddle = new rectangle({height:100, width:10, x:50, y:displayHandler.getHeight()/2,selfAlignmentY:"M"});
     rightPaddle = new rectangle({height:100, width:10, x:50, y:displayHandler.getHeight()/2, screenAlignmentX:"R",selfAlignmentY:"M"});
 
-    displayHandler.drawRect(pongBall);
-    displayHandler.drawRect(leftPaddle);
-    displayHandler.drawRect(rightPaddle);
+    displayHandler.redrawAll();
 }
 
 function update()
 {
-
+    
 }
-
-
 
 initialise();
 
