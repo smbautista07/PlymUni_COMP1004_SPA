@@ -80,19 +80,33 @@ class rectangle
         this.x = x;
         this.y = y;
     }
-
 }
 
 
-var r;
+var pongBall;
+var leftPaddle;
+var rightPaddle;
 function initialise()
 {
     displayHandler.createDisplay({width:960, height:540});    
     console.log(displayHandler.getWidth());
-    r = new rectangle({height:20, width:20,x:50,y:50, screenAlignment: "BR"});
+    pongBall = new rectangle({height:20, width:20,x:50,y:50});
     
-    displayHandler.drawRect(r);
+
+    leftPaddle = new rectangle({height:100, width:10, x:50, y:displayHandler.getHeight()/2});
+    rightPaddle = new rectangle({height:100, width:10, x:50, y:displayHandler.getHeight()/2, screenAlignment:"TR"});
+
+    displayHandler.drawRect(pongBall);
+    displayHandler.drawRect(leftPaddle);
+    displayHandler.drawRect(rightPaddle);
 }
+
+function update()
+{
+
+}
+
+
 
 initialise();
 
