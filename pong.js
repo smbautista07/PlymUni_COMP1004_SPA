@@ -41,38 +41,77 @@ class displayHandler
 
 class rectangle
 {
-    constructor({height, width, x, y, screenAlignment="TL"})
+    constructor({height, width, x, y, screenAlignmentX="L", screenAlignmentY="T", selfAlignmentX, selfAlignmentY})
     {
         this.height = height;
         this.width = width;
-        this.x = 0;
-        this.y = 0;
+        var offsetX = 0;
+        var offsetY = 0;
+        
+        if (selfAlignmentX === undefined)
+        {
+            selfAlignmentX = screenAlignmentX;
+        } 
+        if (selfAlignmentY === undefined)
+        {
+            selfAlignmentY = screenAlignmentY;
+        } 
 
-        switch (screenAlignment[0])
+        switch (selfAlignmentY)
         {
             case "T":
                 break;
             case "B":
-                y = displayHandler.getHeight() - this.height - y;
+                offsetY += -height;
+                break;
+            case "M":
+                offsetY += -height/2;
                 break;
             default:
-                console.error("Invalid screenAlignment argument");
-                y = -9999;
-                
+                console.error("Invalid selfAlignmentY argument");
+                offsetY += -9999;
         }
-        switch (screenAlignment[1])
+
+        switch (selfAlignmentX)
         {
             case "L":
                 break;
             case "R":
-                x = displayHandler.getWidth() - this.width - x;
+                offsetX += -width;
+                break;
+            case "M":
+                offsetX += -width/2;
+                break;
+            default:
+                console.error("Invalid selfAlignmentX argument");
+                offsetX += -9999;
+        }
+
+        switch (screenAlignmentY)
+        {
+            case "T":
+                break;
+            case "B":
+                y = displayHandler.getHeight() - y;
+                break;
+            default:
+                console.error("Invalid screenAlignment argument");
+                y = -9999;
+        }
+
+        switch (screenAlignmentX)
+        {
+            case "L":
+                break;
+            case "R":
+                x = displayHandler.getWidth() - x;
                 break;
             default:
                 console.error("Invalid screenAlignment argument");
                 x = -9999;
         }
 
-        this.setPosition({x:x, y:y})
+        this.setPosition({x: x+offsetX, y: y+offsetY});
     }
 
     setPosition({x,y})
@@ -89,12 +128,10 @@ var rightPaddle;
 function initialise()
 {
     displayHandler.createDisplay({width:960, height:540});    
-    console.log(displayHandler.getWidth());
-    pongBall = new rectangle({height:20, width:20,x:50,y:50});
     
-
-    leftPaddle = new rectangle({height:100, width:10, x:50, y:displayHandler.getHeight()/2});
-    rightPaddle = new rectangle({height:100, width:10, x:50, y:displayHandler.getHeight()/2, screenAlignment:"TR"});
+    pongBall = new rectangle({height:20, width:20,x:0,y:0, screenAlignmentX:"L"});
+    leftPaddle = new rectangle({height:100, width:10, x:50, y:displayHandler.getHeight()/2,selfAlignmentY:"M"});
+    rightPaddle = new rectangle({height:100, width:10, x:50, y:displayHandler.getHeight()/2, screenAlignmentX:"R",selfAlignmentY:"M"});
 
     displayHandler.drawRect(pongBall);
     displayHandler.drawRect(leftPaddle);
