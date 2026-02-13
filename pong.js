@@ -30,17 +30,17 @@ class displayHandler
     
     static drawAll()
     {
-        for (const obj of objectHandler.objects)
+        for (const gameObj of gameObjectHandler.gameObjects)
         {
-            displayHandler.drawRect(obj);
+            displayHandler.drawRect(gameObj);
         }
     }
 
     static clearAll()
     {
-        for (const obj of objectHandler.objects)
+        for (const gameObj of gameObjectHandler.gameObjects)
         {
-            displayHandler.clearRect(obj);
+            displayHandler.clearRect(gameObj);
         }
     }
 
@@ -67,7 +67,7 @@ class rectangle
         this.speedY = 0;
 
 
-        objectHandler.objects.add(this);
+        gameObjectHandler.gameObjects.add(this);
 
 
         if (selfAlignmentX === undefined)
@@ -143,31 +143,22 @@ class rectangle
     }
 }
 
-class objectHandler
+class gameObjectHandler
 {
-    static objects = new Set();
+    static gameObjects = new Set();
    
     static positionUpdateAll()
     {
-        for (const obj of objectHandler.objects)
+        for (const gameObj of gameObjectHandler.gameObjects)
         {
-            objectHandler.positionUpdate(obj);
+            gameObjectHandler.positionUpdate(gameObj);
         }
     }
 
-    static positionUpdate(obj)
+    static positionUpdate(gameObj)
     {
-        obj.x += obj.speedX;
-        obj.y += obj.speedY;
-    }
-    
-    static outputObj()
-    {
-        for (const obj of objectHandler.objects)
-        {
-            console.log(objectHandler.objects);
-            console.log("Hello");
-        }
+        gameObj.x += gameObj.speedX;
+        gameObj.y += gameObj.speedY;
     }
     
 }
@@ -189,9 +180,9 @@ function initialise()
 
     console.log("Hello");
 
-    // objectHandler.positionUpdate(pongBall);
-    // objectHandler.outputObj();
-    // console.log(objectHandler.objects);
+    // gameObjectHandler.positionUpdate(pongBall);
+    // gameObjectHandler.outputObj();
+    // console.log(gameObjectHandler.gameObjects);
     setInterval(update, 30);
     // displayHandler.redrawAll();
 }
@@ -201,7 +192,7 @@ function initialise()
 function update()
 {
     displayHandler.clearAll();
-    objectHandler.positionUpdateAll();
+    gameObjectHandler.positionUpdateAll();
     displayHandler.drawAll();
 }
 
