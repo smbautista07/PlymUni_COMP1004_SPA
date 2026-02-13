@@ -97,7 +97,22 @@ class gameObjectHandler
         gameObj.x += gameObj.speedX;
         gameObj.y += gameObj.speedY;
     }
-    
+}
+
+class inputHandler
+{
+    static inputs = new Set();
+
+    static setup()
+    {
+        document.addEventListener("keydown", inputHandler.updateInputs);
+        document.addEventListener("keyup", inputHandler.updateInputs);
+    }
+
+    static updateInputs(event)
+    {
+        (event.type == "keydown") ? inputHandler.inputs.add(event.code) : inputHandler.inputs.delete(event.code);
+    }
 }
 
 var pongBall;
@@ -106,7 +121,8 @@ var rightPaddle;
 function initialise()
 {
     displayHandler.createDisplay({width:960, height:540});    
-    
+    inputHandler.setup();
+
     pongBall = new rectangle({height:20, width:20});
     leftPaddle = new rectangle({height:100, width:10});
     rightPaddle = new rectangle({height:100, width:10});
@@ -116,21 +132,16 @@ function initialise()
     rightPaddle.setPosition({x:displayHandler.getWidth() - rightPaddle.width-50, y:(displayHandler.getHeight()-rightPaddle.height)/2});
 
     pongBall.speedX=10;
-    leftPaddle.speedY=10;
-
-
-    setInterval(update, 30);
-    console.log(gameObjectHandler.gameObjects);
+    leftPaddle.speedY=10;  
 }
-
-
 
 function update()
 {
     displayHandler.clearAll();
     gameObjectHandler.positionUpdateAll();
     displayHandler.drawAll();
+    // console.log(inputHandler.inputs);
 }
 
 initialise();
-
+setInterval(update, 20);  
