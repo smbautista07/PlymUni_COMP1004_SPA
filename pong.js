@@ -43,16 +43,6 @@ class displayHandler
             displayHandler.clearRect(gameObj);
         }
     }
-
-    static getWidth()
-    {
-        return displayHandler.width;
-    }
-
-    static getHeight()
-    {
-        return displayHandler.height;
-    }
 }
 
 class rectangle
@@ -128,8 +118,8 @@ function initialise()
     rightPaddle = new rectangle({height:100, width:10});
 
     pongBall.setPosition({x:0, y:0});
-    leftPaddle.setPosition({x:50, y:(displayHandler.getHeight()-leftPaddle.width)/2});
-    rightPaddle.setPosition({x:displayHandler.getWidth() - rightPaddle.width-50, y:(displayHandler.getHeight()-rightPaddle.height)/2});
+    leftPaddle.setPosition({x:50, y:(displayHandler.height-leftPaddle.width)/2});
+    rightPaddle.setPosition({x:displayHandler.width - rightPaddle.width-50, y:(displayHandler.height-rightPaddle.height)/2});
 
     pongBall.speedX=10;
     leftPaddle.speedY=10;  
