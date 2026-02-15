@@ -91,17 +91,37 @@ class gameObjectHandler
 
 class inputHandler
 {
-    static inputs = new Set();
-
+    static keyObjectMap = new Map();
+    
     static setup()
     {
-        document.addEventListener("keydown", inputHandler.updateInputs);
-        document.addEventListener("keyup", inputHandler.updateInputs);
+        document.addEventListener("keydown", inputHandler.keyToAction);
+        document.addEventListener("keyup", inputHandler.keyToAction);
+    }
+    
+    static createKeyBind({key, onPress, onRelease})
+    {
+        const currentKeyObj = {onPress:onPress, onRelease:onRelease, keyStillPressed:false};
+        this.keyObjectMap.set(key, currentKeyObj);
     }
 
-    static updateInputs(event)
+    static keyToAction(event)
     {
-        (event.type == "keydown") ? inputHandler.inputs.add(event.code) : inputHandler.inputs.delete(event.code);
+        const currentKey = event.code;
+        if (inputHandler.keyObjectMap.has(currentKey))
+        {
+            const keyObj = inputHandler.keyObjectMap.get(currentKey);
+            if (keyObj.keyStillPressed == false && event.type == "keydown")
+            {
+                keyObj.onPress();
+                keyObj.keyStillPressed = true;
+            }
+            if (keyObj.keyStillPressed == true && event.type == "keyup")
+            {
+                keyObj.onRelease();
+                keyObj.keyStillPressed = false;
+            }
+        }
     }
 }
 
@@ -121,17 +141,31 @@ function initialise()
     leftPaddle.setPosition({x:50, y:(displayHandler.height-leftPaddle.width)/2});
     rightPaddle.setPosition({x:displayHandler.width - rightPaddle.width-50, y:(displayHandler.height-rightPaddle.height)/2});
 
-    pongBall.speedX=10;
-    leftPaddle.speedY=10;  
+    inputHandler.createKeyBind({key:"KeyW", onPress:temp, onRelease:temp2} );
+    inputHandler.createKeyBind({key: "KeyS", onPress:temp2, onRelease:temp});
+
+
 }
 
-function update()
+function temp()
+{
+    leftPaddle.speedY += -10;
+}
+function temp2()
+{
+    leftPaddle.speedY += 10;
+}
+
+
+function gameLoop()
 {
     displayHandler.clearAll();
+
+
+
     gameObjectHandler.positionUpdateAll();
     displayHandler.drawAll();
-    // console.log(inputHandler.inputs);
 }
 
 initialise();
-setInterval(update, 20);  
+setInterval(gameLoop, 10);  
