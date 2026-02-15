@@ -92,7 +92,8 @@ class gameObjectHandler
 class inputHandler
 {
     static keyObjectMap = new Map();
-    
+    static preventDefaultKeyAction = new Set();
+
     static setup()
     {
         document.addEventListener("keydown", inputHandler.keyToAction);
@@ -122,6 +123,16 @@ class inputHandler
                 keyObj.keyStillPressed = false;
             }
         }
+
+        if (inputHandler.preventDefaultKeyAction.has(currentKey))
+        {
+            event.preventDefault();
+        }
+    }
+
+    static preventDefault(key)
+    {
+        inputHandler.preventDefaultKeyAction.add(key);
     }
 }
 
@@ -143,9 +154,11 @@ function initialise()
 
     inputHandler.createKeyBind({key:"KeyW", onPress:temp, onRelease:temp2} );
     inputHandler.createKeyBind({key: "KeyS", onPress:temp2, onRelease:temp});
-
-
+    inputHandler.createKeyBind({key: "ArrowUp", onPress:temp3, onRelease:temp4});
+    inputHandler.createKeyBind({key: "ArrowDown", onPress:temp4, onRelease:temp3});
+    inputHandler.preventDefault("Tab");
 }
+
 
 function temp()
 {
@@ -156,6 +169,14 @@ function temp2()
     leftPaddle.speedY += 10;
 }
 
+function temp3()
+{
+    rightPaddle.speedY += -10;
+}
+function temp4()
+{
+    rightPaddle.speedY += 10;
+}
 
 function gameLoop()
 {
