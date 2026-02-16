@@ -38,10 +38,7 @@ class displayHandler
 
     static clearAll()
     {
-        for (const gameObj of gameObjectHandler.gameObjects)
-        {
-            displayHandler.clearRect(gameObj);
-        }
+        displayHandler.ctx.clearRect(0,0,displayHandler.width, displayHandler.height);
     }
 }
 
@@ -73,7 +70,8 @@ class rectangle
 class gameObjectHandler
 {
     static gameObjects = new Set();
-   
+
+    static collisionPairToFunc = new Set();
     static positionUpdateAll()
     {
         for (const gameObj of gameObjectHandler.gameObjects)
@@ -86,6 +84,34 @@ class gameObjectHandler
     {
         gameObj.x += gameObj.speedX;
         gameObj.y += gameObj.speedY;
+    }
+
+    static createCollisionInteraction({gameObj1, gameObj2, collisionFunc})
+    {
+        gameObjectHandler.collisionPairToFunc.add({obj1:gameObj1, obj2:gameObj2, collisionFunc:collisionFunc});
+    }
+
+    static checkCollisionInteractions()
+    {
+        for (const infoObj of gameObjectHandler.collisionPairToFunc)
+        {
+            if (gameObjectHandler.AABB(infoObj.obj1, infoObj.obj2))
+            {
+                infoObj.collisionFunc();
+            }
+        }
+    }
+
+    static AABB(gameObj1, gameObj2)
+    {
+        if (gameObj1.x+gameObj1.width>gameObj2.x && gameObj1.x < gameObj2.x+gameObj2.width)
+        {
+            if (gameObj1.y<gameObj2.y+gameObj2.height && gameObj1.y+gameObj1.height > gameObj2.y)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
@@ -103,7 +129,7 @@ class inputHandler
     static createKeyBind({key, onPress, onRelease})
     {
         const currentKeyObj = {onPress:onPress, onRelease:onRelease, keyStillPressed:false};
-        this.keyObjectMap.set(key, currentKeyObj);
+        inputHandler.keyObjectMap.set(key, currentKeyObj);
     }
 
     static keyToAction(event)
@@ -139,7 +165,8 @@ class inputHandler
 var pongBall;
 var leftPaddle;
 var rightPaddle;
-function initialise()
+
+function gameStart()
 {
     displayHandler.createDisplay({width:960, height:540});    
     inputHandler.setup();
@@ -148,17 +175,31 @@ function initialise()
     leftPaddle = new rectangle({height:100, width:10});
     rightPaddle = new rectangle({height:100, width:10});
 
-    pongBall.setPosition({x:0, y:0});
-    leftPaddle.setPosition({x:50, y:(displayHandler.height-leftPaddle.width)/2});
-    rightPaddle.setPosition({x:displayHandler.width - rightPaddle.width-50, y:(displayHandler.height-rightPaddle.height)/2});
-
     inputHandler.createKeyBind({key:"KeyW", onPress:temp, onRelease:temp2} );
     inputHandler.createKeyBind({key: "KeyS", onPress:temp2, onRelease:temp});
     inputHandler.createKeyBind({key: "ArrowUp", onPress:temp3, onRelease:temp4});
     inputHandler.createKeyBind({key: "ArrowDown", onPress:temp4, onRelease:temp3});
     inputHandler.preventDefault("Tab");
+
+    gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPaddle, collisionFunc:bounce});
+    gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:bounce});
+
+    leftPaddle.setPosition({x:50, y:(displayHandler.height-leftPaddle.height)/2});
+    rightPaddle.setPosition({x:displayHandler.width - rightPaddle.width-50, y:(displayHandler.height-rightPaddle.height)/2});
+    resetPongball();
 }
 
+function resetPongball()
+{
+    pongBall.setPosition({x:(displayHandler.width-pongBall.width)/2, y:(displayHandler.height-pongBall.height)/2});
+    pongBall.speedX = Math.random()*10;
+    // pongBall.speedY = Math.random()*10;
+}
+
+function bounce()
+{
+    pongBall.speedX *= -1;
+}
 
 function temp()
 {
@@ -181,12 +222,10 @@ function temp4()
 function gameLoop()
 {
     displayHandler.clearAll();
-
-
-
     gameObjectHandler.positionUpdateAll();
+    gameObjectHandler.checkCollisionInteractions();
     displayHandler.drawAll();
 }
 
-initialise();
+gameStart();
 setInterval(gameLoop, 10);  
