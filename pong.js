@@ -184,16 +184,25 @@ function gameStart()
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPaddle, collisionFunc:bounce});
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:bounce});
 
-    leftPaddle.setPosition({x:50, y:(displayHandler.height-leftPaddle.height)/2});
-    rightPaddle.setPosition({x:displayHandler.width - rightPaddle.width-50, y:(displayHandler.height-rightPaddle.height)/2});
+    leftPaddle.setPosition({x:50, y:calculateBottomScreenY(leftPaddle)/2});
+    rightPaddle.setPosition({x:calculateEndScreenX(rightPaddle)-50, y:calculateBottomScreenY(rightPaddle)/2});
     resetPongball();
 }
 
 function resetPongball()
 {
-    pongBall.setPosition({x:(displayHandler.width-pongBall.width)/2, y:(displayHandler.height-pongBall.height)/2});
+    pongBall.setPosition({x:calculateEndScreenX(pongBall)/2, y:calculateBottomScreenY(pongBall)/2});
     pongBall.speedX = Math.random()*10;
     // pongBall.speedY = Math.random()*10;
+}
+
+function calculateBottomScreenY(gameObj)
+{
+    return (displayHandler.height-gameObj.height)
+}
+function calculateEndScreenX(gameObj)
+{
+    return (displayHandler.width-gameObj.width)
 }
 
 function bounce()
