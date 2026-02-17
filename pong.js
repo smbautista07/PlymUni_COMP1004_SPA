@@ -2,16 +2,14 @@
 
 class displayHandler
 {
-    static width = 960;
-    static height = 540;
     static gameCanvas;
     static ctx;
 
     static createDisplay({width, height})
     {
         displayHandler.gameCanvas = document.createElement("canvas");
-        displayHandler.gameCanvas.width = displayHandler.width;
-        displayHandler.gameCanvas.height = displayHandler.height;
+        displayHandler.gameCanvas.width = 960;
+        displayHandler.gameCanvas.height = 540;
         displayHandler.gameCanvas.id = "display";
         document.body.appendChild(displayHandler.gameCanvas);
         
@@ -23,6 +21,12 @@ class displayHandler
         displayHandler.ctx.fillRect(rect_obj.x,rect_obj.y,rect_obj.width,rect_obj.height);
     }
 
+    static drawText(text_obj)
+    {
+        displayHandler.ctx.font = "bold 100px sans-serif";
+        displayHandler.ctx.textAlign = "center";
+        displayHandler.ctx.fillText(text_obj.text, text_obj.x, text_obj.y);
+    }
     static clearRect(rect_obj)
     {
         displayHandler.ctx.clearRect(rect_obj.x,rect_obj.y,rect_obj.width,rect_obj.height);
@@ -32,13 +36,25 @@ class displayHandler
     {
         for (const gameObj of gameObjectHandler.gameObjects)
         {
-            displayHandler.drawRect(gameObj);
+            switch(gameObj.constructor.name)
+            {
+                case "rectangle":
+                    displayHandler.drawRect(gameObj);
+                    break;
+                case "textGameObj":
+                    displayHandler.drawText(gameObj);
+                    break;
+                default:
+                    console.error("Invalid object drawn");
+
+            }
+            
         }
     }
 
-    static clearAll()
+    static clearDisplay()
     {
-        displayHandler.ctx.clearRect(0,0,displayHandler.width, displayHandler.height);
+        displayHandler.ctx.clearRect(0,0,displayHandler.gameCanvas.width, displayHandler.gameCanvas.height);
     }
 }
 
@@ -67,15 +83,31 @@ class rectangle
     }
 }
 
+class textGameObj
+{
+    constructor({text, x, y})
+    {
+        this.text = text;
+        this.x = x;
+        this.y = y;
+        gameObjectHandler.gameObjects.add(this);
+    }
+}
+
 class gameObjectHandler
 {
     static gameObjects = new Set();
 
-    static collisionPairToFunc = new Set();
+    static collisionInteraction = new Set();
     static positionUpdateAll()
     {
         for (const gameObj of gameObjectHandler.gameObjects)
         {
+            if (gameObj.speedX === undefined||gameObj.speedY ===undefined)
+            {
+                return;
+            }
+
             gameObjectHandler.positionUpdate(gameObj);
         }
     }
@@ -88,12 +120,12 @@ class gameObjectHandler
 
     static createCollisionInteraction({gameObj1, gameObj2, collisionFunc})
     {
-        gameObjectHandler.collisionPairToFunc.add({obj1:gameObj1, obj2:gameObj2, collisionFunc:collisionFunc});
+        gameObjectHandler.collisionInteraction.add({obj1:gameObj1, obj2:gameObj2, collisionFunc:collisionFunc});
     }
 
     static checkCollisionInteractions()
     {
-        for (const infoObj of gameObjectHandler.collisionPairToFunc)
+        for (const infoObj of gameObjectHandler.collisionInteraction)
         {
             if (gameObjectHandler.AABB(infoObj.obj1, infoObj.obj2))
             {
@@ -165,6 +197,9 @@ class inputHandler
 var pongBall;
 var leftPaddle;
 var rightPaddle;
+var leftPlayerScoreBoard;
+var rightPlayerScoreBoard;
+
 
 function gameStart()
 {
@@ -175,7 +210,10 @@ function gameStart()
     leftPaddle = new rectangle({height:100, width:10});
     rightPaddle = new rectangle({height:100, width:10});
 
-    inputHandler.createKeyBind({key:"KeyW", onPress:temp, onRelease:temp2} );
+    leftPlayerScoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:100});
+    rightPlayerScoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:100});
+
+    inputHandler.createKeyBind({key:"KeyW", onPress:temp, onRelease:temp2});
     inputHandler.createKeyBind({key: "KeyS", onPress:temp2, onRelease:temp});
     inputHandler.createKeyBind({key: "ArrowUp", onPress:temp3, onRelease:temp4});
     inputHandler.createKeyBind({key: "ArrowDown", onPress:temp4, onRelease:temp3});
@@ -184,25 +222,26 @@ function gameStart()
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPaddle, collisionFunc:bounce});
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:bounce});
 
-    leftPaddle.setPosition({x:50, y:calculateBottomScreenY(leftPaddle)/2});
-    rightPaddle.setPosition({x:calculateEndScreenX(rightPaddle)-50, y:calculateBottomScreenY(rightPaddle)/2});
+    leftPaddle.setPosition({x:50, y:bottomScreenY(leftPaddle)/2});
+    rightPaddle.setPosition({x:endScreenX(rightPaddle)-50, y:bottomScreenY(rightPaddle)/2});
     resetPongball();
 }
 
 function resetPongball()
 {
-    pongBall.setPosition({x:calculateEndScreenX(pongBall)/2, y:calculateBottomScreenY(pongBall)/2});
+    pongBall.setPosition({x:endScreenX(pongBall)/2, y:bottomScreenY(pongBall)/2});
     pongBall.speedX = Math.random()*10;
-    // pongBall.speedY = Math.random()*10;
+    pongBall.speedY = Math.random()*10;
 }
 
-function calculateBottomScreenY(gameObj)
+
+function bottomScreenY(gameObj)
 {
-    return (displayHandler.height-gameObj.height)
+    return (displayHandler.gameCanvas.height-gameObj.height)
 }
-function calculateEndScreenX(gameObj)
+function endScreenX(gameObj)
 {
-    return (displayHandler.width-gameObj.width)
+    return (displayHandler.gameCanvas.width-gameObj.width)
 }
 
 function bounce()
@@ -228,10 +267,50 @@ function temp4()
     rightPaddle.speedY += 10;
 }
 
+function pongBallEdgeInteraction()
+{
+    if (pongBall.x < 0)
+    {
+        resetPongball();
+        rightPlayerScoreBoard.text++;
+    }
+    if (pongBall.x+pongBall.width > displayHandler.gameCanvas.width)
+    {
+        resetPongball();
+        leftPlayerScoreBoard.text++;
+    }
+    if (pongBall.y < 0)
+    {
+        pongBall.y = 0;
+        pongBall.speedY *=-1;
+    }
+    if (pongBall.y + pongBall.height > displayHandler.gameCanvas.height)
+    {
+        pongBall.y = displayHandler.gameCanvas.height - pongBall.height;
+        pongBall.speedY *=-1;
+    }
+
+}
+
+function paddleScreenEdgeInteraction(gameObj)
+{
+    if (gameObj.y < 0)
+    {
+        gameObj.y = 0;
+    }
+    if (gameObj.y > bottomScreenY(gameObj))
+    {
+        gameObj.y = bottomScreenY(gameObj);
+    }
+}
+
 function gameLoop()
 {
-    displayHandler.clearAll();
+    displayHandler.clearDisplay();
     gameObjectHandler.positionUpdateAll();
+    pongBallEdgeInteraction(pongBall);
+    paddleScreenEdgeInteraction(leftPaddle);
+    paddleScreenEdgeInteraction(rightPaddle);
     gameObjectHandler.checkCollisionInteractions();
     displayHandler.drawAll();
 }
