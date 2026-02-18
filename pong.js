@@ -5,6 +5,13 @@ class displayHandler
     static gameCanvas;
     static ctx;
 
+    static updateDisplay()
+    {
+        displayHandler.clearDisplay();
+        displayHandler.drawAll();
+        requestAnimationFrame(displayHandler.updateDisplay);
+    }
+
     static createDisplay({width, height})
     {
         displayHandler.gameCanvas = document.createElement("canvas");
@@ -27,11 +34,7 @@ class displayHandler
         displayHandler.ctx.textAlign = "center";
         displayHandler.ctx.fillText(text_obj.text, text_obj.x, text_obj.y);
     }
-    static clearRect(rect_obj)
-    {
-        displayHandler.ctx.clearRect(rect_obj.x,rect_obj.y,rect_obj.width,rect_obj.height);
-    }
-    
+
     static drawAll()
     {
         for (const gameObj of gameObjectHandler.gameObjects)
@@ -60,20 +63,16 @@ class displayHandler
 
 class rectangle
 {
-    constructor({height, width})
+    constructor({height, width, x=0, y=0})
     {
         this.height = height;
         this.width = width;
+        this.x = x;
+        this.y = y;
         this.speedX = 0;
         this.speedY = 0;
         
         gameObjectHandler.gameObjects.add(this);
-    }
-
-    setPosition({x=this.x,y=this.y})
-    {
-        this.x = x;    
-        this.y = y;    
     }
 }
 
@@ -84,6 +83,8 @@ class textGameObj
         this.text = text;
         this.x = x;
         this.y = y;
+        this.speedX = 0;
+        this.speedY = 0;
         gameObjectHandler.gameObjects.add(this);
     }
 }
@@ -92,18 +93,18 @@ class gameObjectHandler
 {
     static gameObjects = new Set();
 
-    static collisionInteraction = new Set();
+    static collisionInteractions = new Set();
     static positionUpdateAll()
     {
-        for (const gameObj of gameObjectHandler.gameObjects)
-        {
-            if (gameObj.speedX === undefined||gameObj.speedY ===undefined)
-            {
-                return;
-            }
-
-            gameObjectHandler.positionUpdate(gameObj);
-        }
+        gameObjectHandler.gameObjects.forEach(gameObjectHandler.positionUpdate);
+        // for (const gameObj of gameObjectHandler.gameObjects)
+        // {
+        //     if (gameObj.speedX === undefined||gameObj.speedY ===undefined)
+        //     {
+        //         return;
+        //     }
+        //     gameObjectHandler.positionUpdate(gameObj);
+        // }
     }
 
     static positionUpdate(gameObj)
@@ -114,20 +115,29 @@ class gameObjectHandler
 
     static createCollisionInteraction({gameObj1, gameObj2, collisionFunc})
     {
-        gameObjectHandler.collisionInteraction.add({obj1:gameObj1, obj2:gameObj2, collisionFunc:collisionFunc});
+        gameObjectHandler.collisionInteractions.add({obj1:gameObj1, obj2:gameObj2, collisionFunc:collisionFunc});
     }
 
     static checkCollisionInteractions()
     {
-        for (const infoObj of gameObjectHandler.collisionInteraction)
+        gameObjectHandler.collisionInteractions.forEach(gameObjectHandler.checkCollisionInteraction);
+        // for (const infoObj of gameObjectHandler.collisionInteractions)
+        // {
+        //     if (gameObjectHandler.AABB(infoObj.obj1, infoObj.obj2))
+        //     {
+        //         infoObj.collisionFunc();
+        //     }
+        // }
+    } 
+
+    static checkCollisionInteraction(infoObj)
+    {
+        if (gameObjectHandler.AABB(infoObj.obj1, infoObj.obj2))
         {
-            if (gameObjectHandler.AABB(infoObj.obj1, infoObj.obj2))
-            {
-                infoObj.collisionFunc();
-            }
+            infoObj.collisionFunc();
         }
     }
-
+    
     static AABB(gameObj1, gameObj2)
     {
         if (gameObj1.x+gameObj1.width>gameObj2.x && gameObj1.x < gameObj2.x+gameObj2.width)
@@ -175,7 +185,7 @@ class inputHandler
                 keyObj.keyStillPressed = false;
             }
         }
-
+        
         if (inputHandler.preventDefaultKeyAction.has(currentKey))
         {
             event.preventDefault();
@@ -201,8 +211,16 @@ function gameStart()
     inputHandler.setup();
 
     pongBall = new rectangle({height:20, width:20});
+    resetPongball();
+
     leftPaddle = new rectangle({height:100, width:10});
+    leftPaddle.x = 50;
+    leftPaddle.y = bottomScreenY(leftPaddle)/2
+
+
     rightPaddle = new rectangle({height:100, width:10});
+    rightPaddle.x=endScreenX(rightPaddle)-50;
+    rightPaddle.y=bottomScreenY(rightPaddle)/2
 
     leftPlayerScoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:100});
     rightPlayerScoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:100});
@@ -215,21 +233,19 @@ function gameStart()
 
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPaddle, collisionFunc:bounce});
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:bounce});
-
-    leftPaddle.setPosition({x:50, y:bottomScreenY(leftPaddle)/2});
-    rightPaddle.setPosition({x:endScreenX(rightPaddle)-50, y:bottomScreenY(rightPaddle)/2});
-    resetPongball();
 }
 
 function resetPongball()
 {
-    pongBall.setPosition({x:endScreenX(pongBall)/2, y:bottomScreenY(pongBall)/2});
-    pongBall.speedX = randomNumber(5,10);
+    pongBall.x = endScreenX(pongBall)/2;
+    pongBall.y = bottomScreenY(pongBall)/2;
+
+    pongBall.speedX = randomInt(4,8);
     if (Math.random() <= 0.5)
     {
         pongBall.speedX *= -1;
     }
-    pongBall.speedY = randomNumber(5,10);
+    pongBall.speedY = randomInt(4,8);
     if (Math.random() <= 0.5)
     {
         pongBall.speedY *= -1;
@@ -239,6 +255,11 @@ function resetPongball()
 function randomNumber(min, max)
 {
     return Math.random()*(max-min)+min;
+}
+
+function randomInt(min, max)
+{
+    return Math.floor(Math.random()*(max-min+1) + min);
 }
 
 function bottomScreenY(gameObj)
@@ -254,6 +275,13 @@ function bounce()
 {
     pongBall.speedX *= -1;
 }
+
+function setObjectSpeed(paddle, x=paddle.speedX, y = paddle.speedY)
+{
+    paddle.speedX = x;
+    paddle.speedY = y;
+}
+
 
 function temp()
 {
@@ -312,14 +340,18 @@ function paddleScreenEdgeInteraction(gameObj)
 
 function gameLoop()
 {
-    displayHandler.clearDisplay();
+    // displayHandler.clearDisplay();
+    
     gameObjectHandler.positionUpdateAll();
     pongBallEdgeInteraction(pongBall);
     paddleScreenEdgeInteraction(leftPaddle);
     paddleScreenEdgeInteraction(rightPaddle);
     gameObjectHandler.checkCollisionInteractions();
-    displayHandler.drawAll();
+    // displayHandler.drawAll();
 }
+
+
 
 gameStart();
 setInterval(gameLoop, 10);  
+requestAnimationFrame(displayHandler.updateDisplay);
