@@ -97,14 +97,6 @@ class gameObjectHandler
     static positionUpdateAll()
     {
         gameObjectHandler.gameObjects.forEach(gameObjectHandler.positionUpdate);
-        // for (const gameObj of gameObjectHandler.gameObjects)
-        // {
-        //     if (gameObj.speedX === undefined||gameObj.speedY ===undefined)
-        //     {
-        //         return;
-        //     }
-        //     gameObjectHandler.positionUpdate(gameObj);
-        // }
     }
 
     static positionUpdate(gameObj)
@@ -121,13 +113,6 @@ class gameObjectHandler
     static checkCollisionInteractions()
     {
         gameObjectHandler.collisionInteractions.forEach(gameObjectHandler.checkCollisionInteraction);
-        // for (const infoObj of gameObjectHandler.collisionInteractions)
-        // {
-        //     if (gameObjectHandler.AABB(infoObj.obj1, infoObj.obj2))
-        //     {
-        //         infoObj.collisionFunc();
-        //     }
-        // }
     } 
 
     static checkCollisionInteraction(infoObj)
@@ -153,42 +138,55 @@ class gameObjectHandler
 
 class inputHandler
 {
-    static keyObjectMap = new Map();
     static preventDefaultKeyAction = new Set();
+    
+    static keyStates = new Map();
+    static keyDown = new Set(); 
+    static keyUp = new Set();
+
+    static getKeyDown(key)
+    {
+        if (inputHandler.keyDown.has(key))
+        {
+            inputHandler.keyDown.delete(key);
+            return true;
+        }
+        return false;
+    }
+
+    static getKeyUp(key)
+    {
+        if (inputHandler.keyUp.has(key))
+        {
+            inputHandler.keyUp.delete(key);
+            return true;
+        }
+        return false;
+    }
 
     static setup()
     {
-        document.addEventListener("keydown", inputHandler.keyToAction);
-        document.addEventListener("keyup", inputHandler.keyToAction);
-    }
-    
-    static createKeyBind({key, onPress, onRelease})
-    {
-        const currentKeyObj = {onPress:onPress, onRelease:onRelease, keyStillPressed:false};
-        inputHandler.keyObjectMap.set(key, currentKeyObj);
+        document.addEventListener("keydown", inputHandler.updateKeyDown);
+        document.addEventListener("keyup", inputHandler.updateKeyUp);
     }
 
-    static keyToAction(event)
+    static updateKeyDown(event)
     {
-        const currentKey = event.code;
-        if (inputHandler.keyObjectMap.has(currentKey))
+        if (event.repeat != true)
         {
-            const keyObj = inputHandler.keyObjectMap.get(currentKey);
-            if (keyObj.keyStillPressed == false && event.type == "keydown")
-            {
-                keyObj.onPress();
-                keyObj.keyStillPressed = true;
-            }
-            if (keyObj.keyStillPressed == true && event.type == "keyup")
-            {
-                keyObj.onRelease();
-                keyObj.keyStillPressed = false;
-            }
+            inputHandler.keyDown.add(event.code);
         }
-        
-        if (inputHandler.preventDefaultKeyAction.has(currentKey))
+        if (inputHandler.preventDefaultKeyAction.has(event.code))
         {
             event.preventDefault();
+        }
+    }
+
+    static updateKeyUp(event)
+    {
+        if (event.repeat != true)
+        {
+            inputHandler.keyUp.add(event.code);
         }
     }
 
@@ -204,7 +202,6 @@ var rightPaddle;
 var leftPlayerScoreBoard;
 var rightPlayerScoreBoard;
 
-
 function gameStart()
 {
     displayHandler.createDisplay({width:960, height:540});    
@@ -217,7 +214,6 @@ function gameStart()
     leftPaddle.x = 50;
     leftPaddle.y = bottomScreenY(leftPaddle)/2
 
-
     rightPaddle = new rectangle({height:100, width:10});
     rightPaddle.x=endScreenX(rightPaddle)-50;
     rightPaddle.y=bottomScreenY(rightPaddle)/2
@@ -225,14 +221,9 @@ function gameStart()
     leftPlayerScoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:100});
     rightPlayerScoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:100});
 
-    inputHandler.createKeyBind({key:"KeyW", onPress:temp, onRelease:temp2});
-    inputHandler.createKeyBind({key: "KeyS", onPress:temp2, onRelease:temp});
-    inputHandler.createKeyBind({key: "ArrowUp", onPress:temp3, onRelease:temp4});
-    inputHandler.createKeyBind({key: "ArrowDown", onPress:temp4, onRelease:temp3});
-    inputHandler.preventDefault("Tab");
-
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPaddle, collisionFunc:bounce});
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:bounce});
+    inputHandler.preventDefault("Tab");
 }
 
 function resetPongball()
@@ -276,31 +267,6 @@ function bounce()
     pongBall.speedX *= -1;
 }
 
-function setObjectSpeed(paddle, x=paddle.speedX, y = paddle.speedY)
-{
-    paddle.speedX = x;
-    paddle.speedY = y;
-}
-
-
-function temp()
-{
-    leftPaddle.speedY += -10;
-}
-function temp2()
-{
-    leftPaddle.speedY += 10;
-}
-
-function temp3()
-{
-    rightPaddle.speedY += -10;
-}
-function temp4()
-{
-    rightPaddle.speedY += 10;
-}
-
 function pongBallEdgeInteraction()
 {
     if (pongBall.x < 0)
@@ -339,19 +305,49 @@ function paddleScreenEdgeInteraction(gameObj)
 }
 
 function gameLoop()
-{
-    // displayHandler.clearDisplay();
-    
+{    
+    if (inputHandler.getKeyDown('KeyW'))
+    {
+        leftPaddle.speedY += -10;
+    }
+    if (inputHandler.getKeyUp('KeyW'))
+    {
+        leftPaddle.speedY += 10;
+    }
+    if (inputHandler.getKeyDown('KeyS'))
+    {
+        leftPaddle.speedY += 10;
+    }
+    if (inputHandler.getKeyUp('KeyS'))
+    {
+        leftPaddle.speedY += -10;
+    }
+    if (inputHandler.getKeyDown('ArrowUp'))
+    {
+        rightPaddle.speedY += -10;
+    }
+    if (inputHandler.getKeyUp('ArrowUp'))
+    {
+        rightPaddle.speedY += 10;
+    }
+    if (inputHandler.getKeyDown('ArrowDown'))
+    {
+        rightPaddle.speedY += 10;
+    }
+    if (inputHandler.getKeyUp('ArrowDown'))
+    {
+        rightPaddle.speedY += -10;
+    }
     gameObjectHandler.positionUpdateAll();
+
     pongBallEdgeInteraction(pongBall);
     paddleScreenEdgeInteraction(leftPaddle);
     paddleScreenEdgeInteraction(rightPaddle);
     gameObjectHandler.checkCollisionInteractions();
-    // displayHandler.drawAll();
+    inputHandler.update
 }
-
-
 
 gameStart();
 setInterval(gameLoop, 10);  
+
 requestAnimationFrame(displayHandler.updateDisplay);
