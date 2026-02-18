@@ -70,16 +70,10 @@ class rectangle
         gameObjectHandler.gameObjects.add(this);
     }
 
-    setPosition({x,y})
+    setPosition({x=this.x,y=this.y})
     {
-        if (x !== undefined)
-        {
-            this.x = x;    
-        } 
-        if (y !== undefined)
-        {
-            this.y = y;    
-        } 
+        this.x = x;    
+        this.y = y;    
     }
 }
 
@@ -230,10 +224,22 @@ function gameStart()
 function resetPongball()
 {
     pongBall.setPosition({x:endScreenX(pongBall)/2, y:bottomScreenY(pongBall)/2});
-    pongBall.speedX = Math.random()*10;
-    pongBall.speedY = Math.random()*10;
+    pongBall.speedX = randomNumber(5,10);
+    if (Math.random() <= 0.5)
+    {
+        pongBall.speedX *= -1;
+    }
+    pongBall.speedY = randomNumber(5,10);
+    if (Math.random() <= 0.5)
+    {
+        pongBall.speedY *= -1;
+    }
 }
 
+function randomNumber(min, max)
+{
+    return Math.random()*(max-min)+min;
+}
 
 function bottomScreenY(gameObj)
 {
