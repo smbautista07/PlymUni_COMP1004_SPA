@@ -117,6 +117,8 @@ function paddleScreenEdgeInteraction(gameObj)
 
 function gameLoop()
 {    
+    inputHandler.updateKeysThisFrame();
+    
     if (inputHandler.getKeyDown('KeyW'))
     {
         leftPaddle.speedY += -10;
@@ -149,13 +151,12 @@ function gameLoop()
     {
         rightPaddle.speedY += -10;
     }
-    gameObjectHandler.positionUpdateAll();
 
+    gameObjectHandler.positionUpdateAll();
     pongBallEdgeInteraction(pongBall);
     paddleScreenEdgeInteraction(leftPaddle);
     paddleScreenEdgeInteraction(rightPaddle);
     gameObjectHandler.checkCollisionInteractions();
-    inputHandler.update
 }
 
 addEventListener("DOMContentLoaded", gameStart);

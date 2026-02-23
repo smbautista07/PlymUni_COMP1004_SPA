@@ -138,15 +138,29 @@ class inputHandler
 {
     static preventDefaultKeyAction = new Set();
     
-    static keyStates = new Map();
-    static keyDown = new Set(); 
-    static keyUp = new Set();
+    static keyCurrentStates = new Set();
+    static keysThisFrame = new Set();
+    static keysLastFrame = new Set();
+
+    static setup()
+    {
+        document.addEventListener("keydown", inputHandler.addKeyState);
+        document.addEventListener("keyup", inputHandler.removeKeyState);
+    }
+
+    static updateKeysThisFrame()
+    {
+        inputHandler.keysLastFrame = new Set(inputHandler.keysThisFrame);
+        inputHandler.keysThisFrame = new Set(inputHandler.keyCurrentStates);
+    }
 
     static getKeyDown(key)
     {
-        if (inputHandler.keyDown.has(key))
+        let isCurrentInput = inputHandler.keysThisFrame.has(key);
+        let isPreviousInput = inputHandler.keysLastFrame.has(key);
+
+        if (isCurrentInput && !isPreviousInput)
         {
-            inputHandler.keyDown.delete(key);
             return true;
         }
         return false;
@@ -154,38 +168,28 @@ class inputHandler
 
     static getKeyUp(key)
     {
-        if (inputHandler.keyUp.has(key))
+        let isCurrentInput = inputHandler.keysThisFrame.has(key);
+        let isPreviousInput = inputHandler.keysLastFrame.has(key);
+
+        if (!isCurrentInput && isPreviousInput)
         {
-            inputHandler.keyUp.delete(key);
             return true;
         }
         return false;
     }
 
-    static setup()
+    static addKeyState(event)
     {
-        document.addEventListener("keydown", inputHandler.updateKeyDown);
-        document.addEventListener("keyup", inputHandler.updateKeyUp);
-    }
-
-    static updateKeyDown(event)
-    {
-        if (event.repeat != true)
-        {
-            inputHandler.keyDown.add(event.code);
-        }
+        inputHandler.keyCurrentStates.add(event.code);
         if (inputHandler.preventDefaultKeyAction.has(event.code))
         {
             event.preventDefault();
         }
     }
 
-    static updateKeyUp(event)
+    static removeKeyState(event)
     {
-        if (event.repeat != true)
-        {
-            inputHandler.keyUp.add(event.code);
-        }
+        inputHandler.keyCurrentStates.delete(event.code);
     }
 
     static preventDefault(key)
@@ -194,4 +198,4 @@ class inputHandler
     }
 }
 
-export {displayHandler, gameObjectHandler, textGameObj, rectangle, inputHandler}
+export {displayHandler, gameObjectHandler, textGameObj, rectangle, inputHandler};
