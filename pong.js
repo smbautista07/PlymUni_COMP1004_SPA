@@ -35,6 +35,9 @@ function gameStart()
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPaddle, collisionFunc:bounce});
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:bounce});
     inputHandler.preventDefault("Tab");
+
+    setInterval(gameLoop,10);
+    requestAnimationFrame(displayHandler.updateDisplay);    
 }
 
 function resetPongball()
@@ -54,7 +57,7 @@ function resetPongball()
     }
 }
 
-function randomNumber(min, max)
+function randomFloat(min, max)
 {
     return Math.random()*(max-min)+min;
 }
@@ -159,7 +162,8 @@ function gameLoop()
     gameObjectHandler.checkCollisionInteractions();
 }
 
-addEventListener("DOMContentLoaded", gameStart);
-setInterval(gameLoop, 10);  
+// gameStart();
+// var starterButton = document.getElementById("pongStarter");
+// starterButton.onclick=gameStart;
 
-requestAnimationFrame(displayHandler.updateDisplay);
+export {gameStart};

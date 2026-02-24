@@ -7,3 +7,48 @@
     transform:translate(-50%, -50%);
 
 }
+
+.gameButton
+{
+    color:green;
+    background-color: yellow;
+}
+
+#gameGrid
+{
+    background-color: paleturquoise;
+    display:grid;
+    grid-template-columns: auto auto auto;
+    grid-template-areas: 
+    "title title title";
+    text-align:center;
+    vertical-align: middle;
+    gap:10px;
+    padding:10px;
+} 
+
+#gameGrid div
+{
+    background-color: grey;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    height:150px;
+    border:solid black 4px;
+    font-size:90px
+}
+#gameGrid div.gameButton
+{
+   transition-duration: 0.2s;
+}
+#gameGrid div.gameButton:hover
+{
+   transform: scale(1.1,1.1);
+}
+
+#gameGrid div#title
+{
+    background-color: palegoldenrod;
+    grid-area:title;
+    font-size:100px;
+}
