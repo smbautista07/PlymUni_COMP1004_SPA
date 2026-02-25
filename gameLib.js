@@ -13,8 +13,8 @@ class displayHandler
     static createDisplay({width, height})
     {
         displayHandler.gameCanvas = document.createElement("canvas");
-        displayHandler.gameCanvas.width = 960;
-        displayHandler.gameCanvas.height = 540;
+        displayHandler.gameCanvas.width = width;
+        displayHandler.gameCanvas.height = height;
         displayHandler.gameCanvas.id = "display";
         document.body.appendChild(displayHandler.gameCanvas);
         
