@@ -1,5 +1,5 @@
 "use strict";
-import {gameStart} from "./pong.js";
+import {gameStart, gameEnd} from "./pong.js";
 
 // var starterButton = document.getElementById("pongStarter");
 // starterButton.style.color="green";
@@ -13,7 +13,7 @@ starterButton.appendChild(starterButtonText);
 
 // starterButton.setAttribute("onclick",gameStart);
 
-starterButton.onclick = launchGame;
+starterButton.onclick = launchGameButtonAction;
 
 
 starterButton.setAttribute("class", "gameButton");
@@ -21,11 +21,14 @@ var bodies = document.getElementById("gameGrid");
 
 bodies.appendChild(starterButton);
 
-
-
-function launchGame()
+function launchGameButtonAction()
 {
     gameStart();
-    starterButton.onclick = "";
+    starterButton.onclick = endGameButtonAction;
 }
 
+function endGameButtonAction()
+{
+    gameEnd();
+    starterButton.onclick = launchGameButtonAction;
+}
