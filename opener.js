@@ -1,11 +1,14 @@
 "use strict";
-import {gameStart} from "./pong.js";
+import {gameStart, gameEnd} from "./pong.js";
 
 var starterButton = document.createElement("div");
 var starterButtonText = document.createTextNode("Pong");
 starterButton.appendChild(starterButtonText);
 
-starterButton.onclick = launchGame;
+
+// starterButton.setAttribute("onclick",gameStart);
+
+starterButton.onclick = launchGameButtonAction;
 
 
 starterButton.setAttribute("class", "gameButton");
@@ -13,11 +16,14 @@ var bodies = document.getElementById("gameGrid");
 
 bodies.appendChild(starterButton);
 
-
-
-function launchGame()
+function launchGameButtonAction()
 {
     gameStart();
-    starterButton.onclick = "";
+    starterButton.onclick = endGameButtonAction;
 }
 
+function endGameButtonAction()
+{
+    gameEnd();
+    starterButton.onclick = launchGameButtonAction;
+}

@@ -57,6 +57,11 @@ class displayHandler
     {
         displayHandler.ctx.clearRect(0,0,displayHandler.gameCanvas.width, displayHandler.gameCanvas.height);
     }
+
+    static deleteDisplay()
+    {
+        document.body.removeChild(displayHandler.gameCanvas);
+    }
 }
 
 class textGameObj

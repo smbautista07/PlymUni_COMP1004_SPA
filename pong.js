@@ -12,6 +12,7 @@ var leftPaddle;
 var rightPaddle;
 var leftPlayerScoreBoard;
 var rightPlayerScoreBoard;
+var gameLoopID;
 
 function gameStart()
 {
@@ -36,7 +37,7 @@ function gameStart()
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:bounce});
     inputHandler.preventDefault("Tab");
 
-    setInterval(gameLoop,10);
+    gameLoopID = setInterval(gameLoop,10);
     requestAnimationFrame(displayHandler.updateDisplay);    
 }
 
@@ -160,10 +161,17 @@ function gameLoop()
     paddleScreenEdgeInteraction(leftPaddle);
     paddleScreenEdgeInteraction(rightPaddle);
     gameObjectHandler.checkCollisionInteractions();
+    console.log("hi");
+}
+
+function gameEnd()
+{
+    displayHandler.deleteDisplay();
+    clearInterval(gameLoopID);
 }
 
 // gameStart();
 // var starterButton = document.getElementById("pongStarter");
 // starterButton.onclick=gameStart;
 
-export {gameStart};
+export {gameStart, gameEnd};
