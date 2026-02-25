@@ -119,6 +119,11 @@ function paddleScreenEdgeInteraction(gameObj)
     }
 }
 
+function startOrStop()
+{
+    gameObjectHandler.isPaused = !gameObjectHandler.isPaused;
+}
+
 function gameLoop()
 {    
     inputHandler.updateKeysThisFrame();
@@ -155,18 +160,22 @@ function gameLoop()
     {
         rightPaddle.speedY += -10;
     }
-
+    if (inputHandler.getKeyDown('Space'))
+    {
+        startOrStop();
+    }
     gameObjectHandler.positionUpdateAll();
     pongBallEdgeInteraction(pongBall);
     paddleScreenEdgeInteraction(leftPaddle);
     paddleScreenEdgeInteraction(rightPaddle);
     gameObjectHandler.checkCollisionInteractions();
-    console.log("hi");
 }
 
 function gameEnd()
 {
     displayHandler.deleteDisplay();
+    gameObjectHandler.gameObjects.clear();
+    gameObjectHandler.collisionInteractions.clear();
     clearInterval(gameLoopID);
 }
 

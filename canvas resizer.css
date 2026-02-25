@@ -1,3 +1,9 @@
+body
+{
+    background-color: paleturquoise;
+
+}
+
 #display
 {
     border: 3px solid black;
@@ -8,16 +14,10 @@
 
 }
 
-.gameButton
-{
-    color:green;
-    background-color: yellow;
-}
-
 #gameGrid
 {
-    background-color: paleturquoise;
     display:grid;
+    grid-template-rows: 510px, 200px, 100px;
     grid-template-columns: auto auto auto;
     grid-template-areas: 
     "title title title";
@@ -33,10 +33,11 @@
     display:flex;
     align-items: center;
     justify-content: center;
-    height:150px;
     border:solid black 4px;
     font-size:90px
 }
+
+
 #gameGrid div.gameButton
 {
    transition-duration: 0.2s;
@@ -46,9 +47,18 @@
    transform: scale(1.1,1.1);
 }
 
+
+
+
 #gameGrid div#title
 {
+    color: grey;
     background-color: palegoldenrod;
     grid-area:title;
-    font-size:100px;
+    font-size:60px;
+    font-weight:1000;
+    border:solid black 0px;
+    justify-content: left;
+    align-items:normal;
+    padding:10px
 }

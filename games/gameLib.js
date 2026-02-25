@@ -80,7 +80,7 @@ class textGameObj
 class gameObjectHandler
 {
     static gameObjects = new Set();
-
+    static isPaused = false;
     static collisionInteractions = new Set();
     static positionUpdateAll()
     {
@@ -89,8 +89,11 @@ class gameObjectHandler
 
     static positionUpdate(gameObj)
     {
-        gameObj.x += gameObj.speedX;
-        gameObj.y += gameObj.speedY;
+        if (!gameObjectHandler.isPaused)
+        {
+            gameObj.x += gameObj.speedX;
+            gameObj.y += gameObj.speedY;
+        }
     }
 
     static createCollisionInteraction({gameObj1, gameObj2, collisionFunc})
@@ -100,7 +103,10 @@ class gameObjectHandler
 
     static checkCollisionInteractions()
     {
-        gameObjectHandler.collisionInteractions.forEach(gameObjectHandler.checkCollisionInteraction);
+        if (!gameObjectHandler.isPaused)
+        {
+            gameObjectHandler.collisionInteractions.forEach(gameObjectHandler.checkCollisionInteraction);
+        }
     } 
 
     static checkCollisionInteraction(infoObj)
