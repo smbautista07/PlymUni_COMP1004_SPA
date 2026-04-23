@@ -13,6 +13,7 @@ var rightPaddle;
 var leftPlayerScoreBoard;
 var rightPlayerScoreBoard;
 var gameLoopID;
+var gameMode;
 
 function gameStart()
 {
@@ -22,11 +23,11 @@ function gameStart()
     pongBall = new rectangle({height:20, width:20});
     resetPongball();
 
-    leftPaddle = new rectangle({height:100, width:10});
+    leftPaddle = new rectangle({height:100, width:20});
     leftPaddle.x = 50;
     leftPaddle.y = bottomScreenY(leftPaddle)/2
 
-    rightPaddle = new rectangle({height:100, width:10});
+    rightPaddle = new rectangle({height:100, width:20});
     rightPaddle.x=endScreenX(rightPaddle)-50;
     rightPaddle.y=bottomScreenY(rightPaddle)/2
 
@@ -37,9 +38,41 @@ function gameStart()
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:pongPaddleInteraction});
     inputHandler.preventDefault("Tab");
 
+    gameObjectHandler.isPaused = true;
+    addEventListener("keydown", selectGameMode);
     gameLoopID = setInterval(gameLoop,10); 
     requestAnimationFrame(displayHandler.updateDisplay);    
+    
+
+
+
 }
+
+function selectGameMode(event)
+{
+    //Single player option
+    switch (event.code)
+    {
+        case "Digit1":
+            gameMode = "Singleplayer";
+        break;
+        case "Digit2":
+            gameMode = "Multiplayer";
+        break;
+        default:
+        console.log("Not an option");
+    }
+    if (gameMode) 
+    {
+        gameObjectHandler.isPaused = false;
+        removeEventListener("keydown", selectGameMode);
+    }
+}
+
+
+
+
+
 
 function resetPongball()
 {
@@ -119,12 +152,12 @@ function bounce(pongBall, currentPaddle, dimension)
 {
     if (dimension == "x")
     {
-        pongBall.speedX *= -1;
+        pongBall.speedX *= -1.1;
     }
 
     if (dimension == "y")
     {
-        pongBall.speedY *= -1;
+        pongBall.speedY *= -1.1;
         pongBall.speedY += currentPaddle.speedY;
         
     }
@@ -168,13 +201,16 @@ function paddleScreenEdgeInteraction(gameObj)
 
 function startOrStop()
 {
-    gameObjectHandler.isPaused = !gameObjectHandler.isPaused;
+    // if (gameMode)
+    // {
+    //     gameObjectHandler.isPaused = !gameObjectHandler.isPaused;
+    // }
 }
 
 function gameLoop()
 {    
     inputHandler.updateKeysThisFrame();
-    
+
     if (inputHandler.getKeyDown('KeyW'))
     {
         leftPaddle.speedY += -10;
@@ -191,22 +227,52 @@ function gameLoop()
     {
         leftPaddle.speedY += -10;
     }
-    if (inputHandler.getKeyDown('ArrowUp'))
+
+    if (gameMode == "Multiplayer")
     {
-        rightPaddle.speedY += -10;
+        if (inputHandler.getKeyDown('ArrowUp'))
+        {
+            rightPaddle.speedY += -10;
+        }
+        if (inputHandler.getKeyUp('ArrowUp'))
+        {
+            rightPaddle.speedY += 10;
+        }
+        if (inputHandler.getKeyDown('ArrowDown'))
+        {
+            rightPaddle.speedY += 10;
+        }
+        if (inputHandler.getKeyUp('ArrowDown'))
+        {
+            rightPaddle.speedY += -10;
+        }
     }
-    if (inputHandler.getKeyUp('ArrowUp'))
+    if (gameMode == "Singleplayer")
     {
-        rightPaddle.speedY += 10;
+        var paddleSpeed = 10;
+
+        if (pongBall.speedX > 0)
+        {    
+            if (Math.random() < 0.3)
+            {
+                if (pongBall.y > rightPaddle.y + rightPaddle.height*0.75)
+                {
+                    rightPaddle.speedY = paddleSpeed*(0.5 + Math.random()/2);
+                }
+                else if (pongBall.y + pongBall.height < rightPaddle.y + rightPaddle.height*0.25)
+                {
+                    rightPaddle.speedY = -paddleSpeed*(0.5 + Math.random()/2);
+                }
+                else
+                {
+                    rightPaddle.speedY = 0;
+                }
+            }
+        }
     }
-    if (inputHandler.getKeyDown('ArrowDown'))
-    {
-        rightPaddle.speedY += 10;
-    }
-    if (inputHandler.getKeyUp('ArrowDown'))
-    {
-        rightPaddle.speedY += -10;
-    }
+
+
+
     if (inputHandler.getKeyDown('Space'))
     {
         startOrStop();
