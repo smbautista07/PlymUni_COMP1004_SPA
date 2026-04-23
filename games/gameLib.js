@@ -98,7 +98,7 @@ class gameObjectHandler
 
     static createCollisionInteraction({gameObj1, gameObj2, collisionFunc})
     {
-        gameObjectHandler.collisionInteractions.add({obj1:gameObj1, obj2:gameObj2, collisionFunc:collisionFunc});
+        gameObjectHandler.collisionInteractions.add({obj1:gameObj1, obj2:gameObj2, collisionFunc:collisionFunc, hasCollided:false});
     }
 
     static checkCollisionInteractions()
@@ -111,9 +111,14 @@ class gameObjectHandler
 
     static checkCollisionInteraction(infoObj)
     {
-        if (gameObjectHandler.AABB(infoObj.obj1, infoObj.obj2))
+        if (gameObjectHandler.AABB(infoObj.obj1, infoObj.obj2) && infoObj.hasCollided == false)
         {
-            infoObj.collisionFunc();
+            infoObj.collisionFunc(infoObj.obj1, infoObj.obj2);
+            infoObj.hasCollided == true;
+        }
+        else if (infoObj.hasCollided == true)
+        {
+            infoObj.hasCollided = false;
         }
     }
     

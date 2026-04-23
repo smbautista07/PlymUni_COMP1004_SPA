@@ -33,11 +33,11 @@ function gameStart()
     leftPlayerScoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:100});
     rightPlayerScoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:100});
 
-    gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPaddle, collisionFunc:bounce});
-    gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:bounce});
+    gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPaddle, collisionFunc:pongPaddleInteraction});
+    gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:pongPaddleInteraction});
     inputHandler.preventDefault("Tab");
 
-    gameLoopID = setInterval(gameLoop,10);
+    gameLoopID = setInterval(gameLoop,10); 
     requestAnimationFrame(displayHandler.updateDisplay);    
 }
 
@@ -77,9 +77,57 @@ function endScreenX(gameObj)
     return (displayHandler.gameCanvas.width-gameObj.width)
 }
 
-function bounce()
+function pongPaddleInteraction(pongBall, currentPaddle)
 {
-    pongBall.speedX *= -1;
+    let firstContactDimension = revertOverlap(pongBall, currentPaddle);
+    bounce(pongBall, currentPaddle, firstContactDimension);
+}
+
+function revertOverlap(pongBall, currentPaddle)
+{   
+    var currentDirectionX = (pongBall.speedX >= 0) ? "right":"left";
+    var overlapX = (currentDirectionX == "right") ? pongBall.x + pongBall.width - currentPaddle.x : pongBall.x - (currentPaddle.x + currentPaddle.width);
+    var overlapTimeX = overlapX / pongBall.speedX;
+
+    var currentDirectionY = (pongBall.speedY >= 0) ? "down":"up";
+
+    var overlapY = (currentDirectionY == "down") ? pongBall.y + pongBall.height - currentPaddle.y : pongBall.y - (currentPaddle.y + currentPaddle.height);
+    console.log(overlapY);
+
+    var overlapTimeY = overlapY / pongBall.speedY;
+
+    //The dimension with greater overlap time is the one with first overlap
+    var firstContactDimension = (overlapTimeX <= overlapTimeY) ? "x": "y";
+
+    if (firstContactDimension == "x")
+    {
+        pongBall.x -= pongBall.speedX*overlapTimeX;
+        pongBall.y -= pongBall.speedY*overlapTimeX
+    }
+    if (firstContactDimension == "y")
+    {
+        // let overlapRatio = pongBall.speedY/(pongBall.speedY+currentPaddle.speedY);
+        pongBall.x -= pongBall.speedX*overlapTimeY;
+        pongBall.y -= pongBall.speedY*overlapTimeY/*overlapRatio*/;
+        // currentPaddle.y -= currentPaddle.speedY*overlapTimeY*(1-overlapRatio);
+    }
+
+    return firstContactDimension;
+}
+
+function bounce(pongBall, currentPaddle, dimension)
+{
+    if (dimension == "x")
+    {
+        pongBall.speedX *= -1;
+    }
+
+    if (dimension == "y")
+    {
+        pongBall.speedY *= -1;
+        pongBall.speedY += currentPaddle.speedY;
+        
+    }
 }
 
 function pongBallEdgeInteraction()
@@ -104,7 +152,6 @@ function pongBallEdgeInteraction()
         pongBall.y = displayHandler.gameCanvas.height - pongBall.height;
         pongBall.speedY *=-1;
     }
-
 }
 
 function paddleScreenEdgeInteraction(gameObj)
@@ -164,6 +211,9 @@ function gameLoop()
     {
         startOrStop();
     }
+
+
+
     gameObjectHandler.positionUpdateAll();
     pongBallEdgeInteraction(pongBall);
     paddleScreenEdgeInteraction(leftPaddle);
