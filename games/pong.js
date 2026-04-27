@@ -8,12 +8,22 @@ import {displayHandler, gameObjectHandler, textGameObj, rectangle, inputHandler}
 // var data = jsonData;
 
 var pongBall;
-var leftPaddle;
-var rightPaddle;
-var leftPlayerScoreBoard;
-var rightPlayerScoreBoard;
 var gameLoopID;
 var gameMode;
+var leftPlayer;
+var rightPlayer;
+var allPaddleSpeed = 10;
+
+
+class player
+{
+    constructor()
+    {
+        var paddle;
+        var controls;
+        var scoreBoard;
+    }
+}
 
 function gameStart()
 {
@@ -23,19 +33,30 @@ function gameStart()
     pongBall = new rectangle({height:20, width:20});
     resetPongball();
 
-    leftPaddle = new rectangle({height:100, width:20});
-    leftPaddle.x = 50;
-    leftPaddle.y = bottomScreenY(leftPaddle)/2
+    leftPlayer = new player();
+    leftPlayer.paddle = new rectangle({height:100, width:20});
+    leftPlayer.paddle.x = 50;
+    leftPlayer.paddle.y = bottomScreenY(leftPlayer.paddle)/2
+    leftPlayer.controls = {
+        up:"KeyW",
+        down:"KeyS"
+    };
 
-    rightPaddle = new rectangle({height:100, width:20});
-    rightPaddle.x=endScreenX(rightPaddle)-50;
-    rightPaddle.y=bottomScreenY(rightPaddle)/2
+    rightPlayer = new player();
+    rightPlayer.paddle = new rectangle({height:100, width:20});
+    rightPlayer.paddle.x=endScreenX(rightPlayer.paddle)-50;
+    rightPlayer.paddle.y=bottomScreenY(rightPlayer.paddle)/2
+    rightPlayer.controls = 
+    {
+        up:"ArrowUp",
+        down:"ArrowDown"
+    }
 
-    leftPlayerScoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:100});
-    rightPlayerScoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:100});
+    leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:100});
+    rightPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:100});
 
-    gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPaddle, collisionFunc:pongPaddleInteraction});
-    gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPaddle, collisionFunc:pongPaddleInteraction});
+    gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPlayer.paddle, collisionFunc:pongPaddleInteraction});
+    gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPlayer.paddle, collisionFunc:pongPaddleInteraction});
     inputHandler.preventDefault("Tab");
 
     gameObjectHandler.isPaused = true;
@@ -67,19 +88,22 @@ function selectGameMode(event)
 
 function resetPongball()
 {
+    var nextDirection;
+
     pongBall.x = endScreenX(pongBall)/2;
     pongBall.y = bottomScreenY(pongBall)/2;
 
-    pongBall.speedX = randomInt(4,8);
-    if (Math.random() <= 0.5)
+    if (pongBall.speedX < 0)
     {
-        pongBall.speedX *= -1;
+        pongBall.speedX = randomInt(4,6);   
     }
-    pongBall.speedY = randomInt(4,8);
-    if (Math.random() <= 0.5)
+    else
     {
-        pongBall.speedY *= -1;
+        pongBall.speedX = randomInt(4,6) * -1;
     }
+    
+    pongBall.speedY = randomInt(4,6);
+
 }
 
 function randomFloat(min, max)
@@ -148,9 +172,7 @@ function bounce(pongBall, currentPaddle, dimension)
 
     if (dimension == "y")
     {
-        pongBall.speedY *= -1.1;
         pongBall.speedY += currentPaddle.speedY;
-        
     }
 }
 
@@ -159,12 +181,12 @@ function pongBallEdgeInteraction()
     if (pongBall.x < 0)
     {
         resetPongball();
-        rightPlayerScoreBoard.text++;
+        rightPlayer.scoreBoard.text++;
     }
     if (pongBall.x+pongBall.width > displayHandler.gameCanvas.width)
     {
         resetPongball();
-        leftPlayerScoreBoard.text++;
+        leftPlayer.scoreBoard.text++;
     }
     if (pongBall.y < 0)
     {
@@ -202,14 +224,14 @@ function gameLoop()
 {    
     inputHandler.updateKeysThisFrame();
 
-    checkLeftPlayerInputs();
+    checkPlayerInputs(leftPlayer);
     if (gameMode == "Singleplayer")
     {
         botAction();
     }
     if (gameMode == "Multiplayer")
     {
-        checkRightPlayerInputs();
+        checkPlayerInputs(rightPlayer);
     }
 
     if (inputHandler.getKeyDown('Space'))
@@ -219,69 +241,49 @@ function gameLoop()
 
     gameObjectHandler.positionUpdateAll();
     pongBallEdgeInteraction(pongBall);
-    paddleScreenEdgeInteraction(leftPaddle);
-    paddleScreenEdgeInteraction(rightPaddle);
+    paddleScreenEdgeInteraction(leftPlayer.paddle);
+    paddleScreenEdgeInteraction(rightPlayer.paddle);
     gameObjectHandler.checkCollisionInteractions();
 }
 
-function checkLeftPlayerInputs()
+function checkPlayerInputs(player)
 {
-    if (inputHandler.getKeyDown('KeyW'))
+    let p = player;
+    if(inputHandler.getKeyDown(player.controls.up))
     {
-        leftPaddle.speedY += -10;
+        p.paddle.speedY += -allPaddleSpeed;
     }
-    if (inputHandler.getKeyUp('KeyW'))
+    if (inputHandler.getKeyUp(player.controls.up))
     {
-        leftPaddle.speedY += 10;
+        p.paddle.speedY += allPaddleSpeed;
     }
-    if (inputHandler.getKeyDown('KeyS'))
+    if (inputHandler.getKeyDown(player.controls.down))
     {
-        leftPaddle.speedY += 10;
+        p.paddle.speedY += allPaddleSpeed;
     }
-    if (inputHandler.getKeyUp('KeyS'))
+    if (inputHandler.getKeyUp(player.controls.down))
     {
-        leftPaddle.speedY += -10;
-    }
-}
-
-function checkRightPlayerInputs()
-{
-    if (inputHandler.getKeyDown('ArrowUp'))
-    {
-        rightPaddle.speedY += -10;
-    }
-    if (inputHandler.getKeyUp('ArrowUp'))
-    {
-        rightPaddle.speedY += 10;
-    }
-    if (inputHandler.getKeyDown('ArrowDown'))
-    {
-        rightPaddle.speedY += 10;
-    }
-    if (inputHandler.getKeyUp('ArrowDown'))
-    {
-        rightPaddle.speedY += -10;
+        p.paddle.speedY += -allPaddleSpeed;
     }
 }
 
 function botAction()
 {
-    var paddleSpeed = 10;
     if (pongBall.speedX > 0)
     {    
         if (Math.random() < 0.3)
         {
-            if (pongBall.y > rightPaddle.y + rightPaddle.height*0.75)
+            if (pongBall.y > rightPlayer.paddle.y + rightPlayer.paddle.height*0.75)
             {
-                rightPaddle.speedY = paddleSpeed*(0.5 + Math.random()/2);
+                rightPlayer.paddle.speedY = allPaddleSpeed*(0.5 + Math.random()/2);
             }
-            else if (pongBall.y + pongBall.height < rightPaddle.y + rightPaddle.height*0.25)
+            else if (pongBall.y + pongBall.height < rightPlayer.paddle.y + rightPlayer.paddle.height*0.25)
             {
-                rightPaddle.speedY = -paddleSpeed*(0.5 + Math.random()/2);
+                rightPlayer.paddle.speedY = -allPaddleSpeed*(0.5 + Math.random()/2);
             }
             else
             {
-                rightPaddle.speedY = 0;
+                rightPlayer.paddle.speedY = 0;
             }
         }
     }
@@ -294,9 +296,5 @@ function gameEnd()
     gameObjectHandler.collisionInteractions.clear();
     clearInterval(gameLoopID);
 }
-
-// gameStart();
-// var starterButton = document.getElementById("pongStarter");
-// starterButton.onclick=gameStart;
 
 export {gameStart, gameEnd};
