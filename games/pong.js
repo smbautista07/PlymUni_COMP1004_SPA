@@ -13,7 +13,7 @@ var gameMode;
 var leftPlayer;
 var rightPlayer;
 var allPaddleSpeed = 10;
-
+var pauseButton;
 
 class player
 {
@@ -55,6 +55,15 @@ function gameStart()
     leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:100});
     rightPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:100});
 
+    let r1 = new rectangle({height:80, width:20, isVisible:false});
+    r1.y = bottomScreenY(r1)/2;
+    r1.x = endScreenX(r1)/2-20;
+    let r2 = new rectangle({height:80, width:20, isVisible:false});
+    r2.y = bottomScreenY(r1)/2;
+    r2.x = endScreenX(r2)/2+20;
+
+    pauseButton = {leftLine:r1, rightLine:r2};
+
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:leftPlayer.paddle, collisionFunc:pongPaddleInteraction});
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPlayer.paddle, collisionFunc:pongPaddleInteraction});
     inputHandler.preventDefault("Tab");
@@ -89,7 +98,6 @@ function selectGameMode(event)
 function resetPongball()
 {
     var nextDirection;
-
     pongBall.x = endScreenX(pongBall)/2;
     pongBall.y = bottomScreenY(pongBall)/2;
 
@@ -101,9 +109,7 @@ function resetPongball()
     {
         pongBall.speedX = randomInt(4,6) * -1;
     }
-    
     pongBall.speedY = randomInt(4,6);
-
 }
 
 function randomFloat(min, max)
@@ -214,10 +220,23 @@ function paddleScreenEdgeInteraction(gameObj)
 
 function startOrStop()
 {
-    // if (gameMode)
-    // {
-    //     gameObjectHandler.isPaused = !gameObjectHandler.isPaused;
-    // }
+    if (!gameMode)
+    {
+        return;
+    }
+
+    if (gameObjectHandler.isPaused)
+    {
+        gameObjectHandler.isPaused = false;
+        pauseButton.leftLine.isVisible = false;
+        pauseButton.rightLine.isVisible = false;
+    }
+    else
+    {
+        gameObjectHandler.isPaused = true;
+        pauseButton.leftLine.isVisible = true;
+        pauseButton.rightLine.isVisible = true;
+    }
 }
 
 function gameLoop()

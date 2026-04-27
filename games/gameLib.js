@@ -37,6 +37,10 @@ class displayHandler
     {
         for (const gameObj of gameObjectHandler.gameObjects)
         {
+            if (!gameObj.isVisible)
+            {
+                continue;
+            }
             switch(gameObj.constructor.name)
             {
                 case "rectangle":
@@ -66,13 +70,14 @@ class displayHandler
 
 class textGameObj
 {
-    constructor({text, x, y})
+    constructor({text, x, y, isVisible=true})
     {
         this.text = text;
         this.x = x;
         this.y = y;
         this.speedX = 0;
         this.speedY = 0;
+        this.isVisible=isVisible;
         gameObjectHandler.gameObjects.add(this);
     }
 }
@@ -137,7 +142,7 @@ class gameObjectHandler
 
 class rectangle
 {
-    constructor({height, width, x=0, y=0})
+    constructor({height, width, x=0, y=0, isVisible=true})
     {
         this.height = height;
         this.width = width;
@@ -145,9 +150,10 @@ class rectangle
         this.y = y;
         this.speedX = 0;
         this.speedY = 0;
-        
+        this.isVisible = isVisible;
         gameObjectHandler.gameObjects.add(this);
     }
+    
 }
 
 class inputHandler
