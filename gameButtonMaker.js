@@ -38,8 +38,6 @@ async function createButton(gameName)
     
     starterButton.onclick = () =>
         {
-            // gameGrid.setAttribute("style.")
-            // gameGrid.style.display = 'none';
             hideGameButtons();
             gameFunctions.gameStart();
         }

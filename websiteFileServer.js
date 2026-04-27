@@ -30,11 +30,15 @@ const server = createServer((req,res) =>
         case "js":
             contentTypeHeaderValue = "text/javascript";
         break;
+        case "png":
+            contentTypeHeaderValue = "image/png";
         default:
             console.log(`idk file type ${fileType} from ${fileName}`);
     }
 
-    fileToSend = readFileSync(`./${fileName}`, "utf-8");
+    // fileToSend = readFileSync(`./${fileName}`, "utf-8");
+    fileToSend = readFileSync(`./${fileName}`);
+
     res.writeHead(200, {"Content-Type":contentTypeHeaderValue, "X-Content-Type-Options":"sniff"});
 
     res.end(fileToSend);
