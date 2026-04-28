@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
-import { readFileSync } from "node:fs";
+import { existsSync, constants, readFileSync } from "node:fs";
+import { relative } from "node:path";
 const port = 3000
 
 
@@ -7,19 +8,37 @@ const server = createServer((req,res) =>
 {
     var fileToSend;
     var contentTypeHeaderValue;
-
-    //replace %20 with spaces
-    var fileName = decodeURI(req.url);
-
+    //space characters get replaced by %20 since they are encoded into URI requests, so we have to reverse that to get the original file name.
+    var filePath = `.${decodeURI(req.url)}`;
+    
     //initial get request only sends / rather than file name
-    if (fileName == '/')
+    if (filePath == './')
     {
-        fileName = "Multi-game SPA.html";
+        filePath = "./Multi-game SPA.html";
+        // filePath = "../nonProjectFile.html";
+    }
+    
+    //convert filePath into understandable terms (can convert alternate path traversal characters into ..)
+    filePath = relative("./", filePath);
+    //check if .. is present. If it is, then user likely using path traversal
+    if (filePath.includes(".."))
+    {
+        console.log(`Unauthorised resource ${filePath} access attempt`);
+        res.writeHead(403);
+        //prevents further processing by going to next server loop and ends request by responding to client with error code
+        return res.end();
     }
 
-    let fileType = findFileExtension(fileName);
+    //Check if file exists
+    if (!existsSync(filePath, constants.F_OK))
+    {
+        console.log(`Failed to access file ${filePath}`);
+        res.writeHead(404);
+        return res.end();
+    }
 
-    switch (fileType)
+    //Get file extension and set headers
+    switch (getFileExtension(filePath))
     {
         case "css":
             contentTypeHeaderValue = "text/css";
@@ -32,28 +51,29 @@ const server = createServer((req,res) =>
         break;
         case "png":
             contentTypeHeaderValue = "image/png";
+            break;
         default:
-            console.log(`idk file type ${fileType} from ${fileName}`);
+            console.error(`Unknown file type ${findFileExtension(filePath)} from ${filePath}`);
+            res.writeHead(404)
+            return res.end();
     }
 
-    // fileToSend = readFileSync(`./${fileName}`, "utf-8");
-    fileToSend = readFileSync(`./${fileName}`);
-
-    res.writeHead(200, {"Content-Type":contentTypeHeaderValue, "X-Content-Type-Options":"sniff"});
-
+    //Send file
+    fileToSend = readFileSync(`${filePath}`);
+    res.writeHead(200, {"Content-Type":contentTypeHeaderValue, "X-Content-Type-Options":"nosniff"});
     res.end(fileToSend);
 })
 
-function findFileExtension(fileName)
+function getFileExtension(filePath)
 {
     let fileExtension;
     let indexOfLastDot;
-    for (let index = fileName.length; index >= 0; index--)
+    for (let index = filePath.length; index >= 0; index--)
     {
-        if (fileName[index] == '.')
+        if (filePath[index] == '.')
         {
             indexOfLastDot = index;
-            fileExtension = fileName.substr(indexOfLastDot+1);
+            fileExtension = filePath.substr(indexOfLastDot+1);
             return fileExtension;
         }
     }
