@@ -11,7 +11,6 @@ body
     left:50%;
     top:50%;
     transform:translate(-50%, -50%);
-
 }
 
 #gameGrid
@@ -20,7 +19,7 @@ body
     grid-template-rows: 510px, 200px, 100px;
     grid-template-columns: auto auto auto;
     grid-template-areas: 
-    "title title title";
+    "title title saveButtonArea";
     text-align:center;
     vertical-align: middle;
     gap:10px;
@@ -34,7 +33,7 @@ body
     align-items: center;
     justify-content: center;
     border:solid black 4px;
-    font-size:90px
+    font-size:60px
 }
 
 
@@ -47,8 +46,32 @@ body
    transform: scale(1.1,1.1);
 }
 
+/* #saveFileButton
+{
+    border: solid black 1em;
+    right:30px;
+    position:absolute;
+    padding:1em;
+    height:1em;
+    background-color: red;
+} */
+#saveFileButton
+{
+    box-sizing: border-box;
+    background-color: aquamarine;
+    width:100%;
+    height:100%;
+}
 
+#saveButtonArea:hover
+{
+    transform: scale(1.1,1.1);
+}
 
+/* #saveFileButton:hover
+{
+   transform: scale(1.1,1.1);
+} */
 
 #gameGrid div#title
 {
@@ -59,6 +82,12 @@ body
     font-weight:1000;
     border:solid black 0px;
     justify-content: left;
-    align-items:normal;
+    vertical-align: middle;
     padding:10px
+}
+
+
+.hidden
+{
+    display:none;
 }

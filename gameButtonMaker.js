@@ -46,10 +46,7 @@ async function createButton(gameName)
 
 function hideGameButtons()
 {
-    console.log(document.getElementsByClassName("gameButton"));
-    // idk.forEach(hideElement);
     let buttons = document.getElementsByClassName("gameButton");
-
     Array.from(buttons).forEach(hideElement);
 }
 
