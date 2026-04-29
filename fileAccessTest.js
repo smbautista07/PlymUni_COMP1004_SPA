@@ -7,12 +7,6 @@ function wt()
     var saveFileInput = document.getElementById("selectFile");
     
     saveFileInput.addEventListener("change", handleSaveFile);
-
-    // async function pleaseWork()
-    // {
-    //     let r = new FileSystemHandle()
-    // }
-
 }
 
 function handleSaveFile()
@@ -29,11 +23,6 @@ function handleSaveFile()
     
     // result.addEventListener("change", removeAllEventListeners);
 }
-
-// function removeAllEventListeners()
-// {
-//     result.removeEventListener("")
-// }
 
 function readJSONFileResult(event)
 {

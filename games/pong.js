@@ -14,6 +14,7 @@ var leftPlayer;
 var rightPlayer;
 var allPaddleSpeed = 10;
 var pauseButton;
+var lifeCounter = {};
 
 class player
 {
@@ -27,6 +28,7 @@ class player
 
 function gameStart()
 {
+
     displayHandler.createDisplay({width:960, height:540});    
     inputHandler.setup();
 
@@ -52,8 +54,7 @@ function gameStart()
         down:"ArrowDown"
     }
 
-    leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:100});
-    rightPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:100});
+    
 
     let r1 = new rectangle({height:80, width:20, isVisible:false});
     r1.y = bottomScreenY(r1)/2;
@@ -81,9 +82,15 @@ function selectGameMode(event)
     {
         case "Digit1":
             gameMode = "Singleplayer";
+            leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/2, y:150});
+            lifeCounter.lives = 5;
+            lifeCounter.display = new textGameObj({text:`Lives:${lifeCounter.lives}`, x:displayHandler.gameCanvas.width/2, y:50, font:"40px bold sans serif"});
+            console.log(lifeCounter.lives);
         break;
         case "Digit2":
             gameMode = "Multiplayer";
+            leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:150});
+            rightPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:150});
         break;
         default:
         console.log("Not an option");
@@ -92,6 +99,8 @@ function selectGameMode(event)
     {
         gameObjectHandler.isPaused = false;
         removeEventListener("keydown", selectGameMode);
+        
+        
     }
 }
 
@@ -187,7 +196,23 @@ function pongBallEdgeInteraction()
     if (pongBall.x < 0)
     {
         resetPongball();
-        rightPlayer.scoreBoard.text++;
+        if (gameMode == "Singleplayer")
+        {
+            if (lifeCounter.lives > 1)
+            {
+                lifeCounter.lives -= 1;
+                lifeCounter.display.text = `Lives:${lifeCounter.lives}`;
+            }
+            else
+            {
+                gameObjectHandler.isPaused = true;
+                endGame();
+            }
+        }
+        else if (gameMode == "Multiplayer")
+        {
+            rightPlayer.scoreBoard.text++;
+        }
     }
     if (pongBall.x+pongBall.width > displayHandler.gameCanvas.width)
     {
@@ -263,6 +288,7 @@ function gameLoop()
     paddleScreenEdgeInteraction(leftPlayer.paddle);
     paddleScreenEdgeInteraction(rightPlayer.paddle);
     gameObjectHandler.checkCollisionInteractions();
+
 }
 
 function checkPlayerInputs(player)
@@ -308,12 +334,50 @@ function botAction()
     }
 }
 
-function gameEnd()
+function endGame()
 {
-    displayHandler.deleteDisplay();
     gameObjectHandler.gameObjects.clear();
     gameObjectHandler.collisionInteractions.clear();
+    var exampleScores = 
+    [
+        {name:"Player A", score:32},
+        {name:"Player B", score:28},
+        {name:"Player C", score:16},
+        {name:"Player D", score:14}
+    ]
+    displayScores(exampleScores);
+}
+
+function saveScores()
+{
+    localStorage.setItem()
+}
+
+function loadScores()
+{
+    localStorage.getItem();
+}
+
+
+function displayScores(scoreArray)
+{
+    let startingHeight = displayHandler.gameCanvas.height/3;
+    let iterations = 0;
+    let lineHeight = 40;
+    new textGameObj({text:`Top Scores:`, x:displayHandler.gameCanvas.width/2, y:displayHandler.gameCanvas.height/4, font:"50px bold sans serif"});
+    scoreArray.forEach((entry) =>
+    {
+        new textGameObj({text:`${entry.name}:${entry.score}`, x:displayHandler.gameCanvas.width/2, y:startingHeight+iterations*lineHeight, font:"30px bold sans serif"});
+        iterations += 1;
+    });
+}
+
+
+
+function exitGame()
+{
+    displayHandler.deleteDisplay();
     clearInterval(gameLoopID);
 }
 
-export {gameStart, gameEnd};
+export {gameStart, exitGame};

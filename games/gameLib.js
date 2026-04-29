@@ -28,7 +28,7 @@ class displayHandler
 
     static drawText(text_obj)
     {
-        displayHandler.ctx.font = "bold 100px sans-serif";
+        displayHandler.ctx.font = text_obj.font;
         displayHandler.ctx.textAlign = "center";
         displayHandler.ctx.fillText(text_obj.text, text_obj.x, text_obj.y);
     }
@@ -70,8 +70,9 @@ class displayHandler
 
 class textGameObj
 {
-    constructor({text, x, y, isVisible=true})
+    constructor({text="", x, y, isVisible=true, font="bold 100px sans-serif"})
     {
+        this.font = font;
         this.text = text;
         this.x = x;
         this.y = y;
