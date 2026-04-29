@@ -83,7 +83,7 @@ function selectGameMode(event)
         case "Digit1":
             gameMode = "Singleplayer";
             leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/2, y:150});
-            lifeCounter.lives = 5;
+            lifeCounter.lives = 3;
             lifeCounter.display = new textGameObj({text:`Lives:${lifeCounter.lives}`, x:displayHandler.gameCanvas.width/2, y:50, font:"40px bold sans serif"});
             console.log(lifeCounter.lives);
         break;
@@ -338,33 +338,77 @@ function endGame()
 {
     gameObjectHandler.gameObjects.clear();
     gameObjectHandler.collisionInteractions.clear();
-    var exampleScores = 
-    [
-        {name:"Player A", score:32},
-        {name:"Player B", score:28},
-        {name:"Player C", score:16},
-        {name:"Player D", score:14}
-    ]
-    displayScores(exampleScores);
+    var exampleScores = loadPongScores();
+
+    updateScoreBoard(leftPlayer.scoreBoard.text, exampleScores);
+
+    displayScores();
+
 }
 
-function saveScores()
+function updateScoreBoard(score, scoreEntries)
 {
-    localStorage.setItem()
+    for (let index = scoreEntries.length-1; index >= 0; index--)
+    {
+        //If this score is greater than the part of the list, move to next
+        if (score > scoreEntries[index].score)
+        {
+            continue;
+        }
+        //its less, place it infront of the compared element
+        else
+        {
+            console.log(scoreEntries[index].score,">",score);
+            let nam="Bill";
+            //Get array of scores greater than the one set
+            let greaterScores = scoreEntries.slice(0,index+1);
+
+            //Get array of values less than this value
+            let lesserScores = scoreEntries.slice(index+1, scoreEntries.length);
+
+            let newArray = [];
+            newArray = newArray.concat(greaterScores).concat({name:nam, score:score}).concat(lesserScores);
+            //return array with value inserted
+            console.log(lesserScores);
+            
+            newArray =  newArray.slice(0,10);
+            console.log(newArray);
+            saveScores(newArray);
+            break;
+        }
+    }
 }
 
-function loadScores()
+function saveScores(scoreEntries)
 {
-    localStorage.getItem();
+    let saveFileObject = loadSaveFile();
+
+    saveFileObject.pong = scoreEntries;
+
+    let saveFileString = JSON.stringify(saveFileObject);
+
+    localStorage.setItem("saveFile", saveFileString);
+}
+
+function loadSaveFile()
+{
+    return JSON.parse(localStorage.getItem("saveFile"));
+}
+
+function loadPongScores()
+{
+    return loadSaveFile().pong;
 }
 
 
-function displayScores(scoreArray)
+function displayScores()
 {
-    let startingHeight = displayHandler.gameCanvas.height/3;
+    let scoreArray = loadPongScores();
+
+    let startingHeight = displayHandler.gameCanvas.height/4;
     let iterations = 0;
     let lineHeight = 40;
-    new textGameObj({text:`Top Scores:`, x:displayHandler.gameCanvas.width/2, y:displayHandler.gameCanvas.height/4, font:"50px bold sans serif"});
+    new textGameObj({text:`Top Scores:`, x:displayHandler.gameCanvas.width/2, y:displayHandler.gameCanvas.height/6, font:"50px bold sans serif"});
     scoreArray.forEach((entry) =>
     {
         new textGameObj({text:`${entry.name}:${entry.score}`, x:displayHandler.gameCanvas.width/2, y:startingHeight+iterations*lineHeight, font:"30px bold sans serif"});
@@ -372,10 +416,10 @@ function displayScores(scoreArray)
     });
 }
 
-
-
 function exitGame()
 {
+    gameObjectHandler.gameObjects.clear();
+    gameObjectHandler.collisionInteractions.clear();
     displayHandler.deleteDisplay();
     clearInterval(gameLoopID);
 }

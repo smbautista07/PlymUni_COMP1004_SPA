@@ -6,28 +6,28 @@ function wt()
 {
     var saveFileInput = document.getElementById("selectFile");
     
-    saveFileInput.addEventListener("change", handleSaveFile);
+    saveFileInput.addEventListener("change", handleSelectedSaveFile);
 }
 
-function handleSaveFile()
+function handleSelectedSaveFile()
 {
     //reference to file user has put into input element
     var [f] = this.files;
     
     //Adds an event listener which reads the result when a file is fully loaded
-    r.addEventListener("load", readJSONFileResult);
+    r.addEventListener("load", saveFileToLocalHost);
     
-
     //Starts loading the file chosen by user 
     r.readAsText(f);
-    
-    // result.addEventListener("change", removeAllEventListeners);
 }
 
-function readJSONFileResult(event)
+function saveFileToLocalHost(event)
 {
-    result = JSON.parse(r.result);
-    console.log(result);
+    localStorage.setItem("saveFile", r.result);
+    
+    //console.log(localStorage.getItem("saveFile"));
+
     //After reading the event listener is removed
-    r.removeEventListener("load", readJSONFileResult);
+    r.removeEventListener("load", saveFileToLocalHost);
+
 }

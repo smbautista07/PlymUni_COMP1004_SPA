@@ -1,11 +1,25 @@
-const fileToDownload = new Blob(["{}"],{type:"application/json"});
-const linkToFile = URL.createObjectURL(fileToDownload);
-const tempElement = document.createElement("a")
+addEventListener("DOMContentLoaded", saveButtonSetup)
 
-tempElement.href = linkToFile;
+function saveButtonSetup()
+{
+    var a = document.getElementById("saveExportButton");
 
-//name of downloaded file
-tempElement.download = "downloadtext.json";
-document.body.appendChild(tempElement);
+    a.style.color = "green"
 
-tempElement.click();
+    a.onclick = () =>
+    {
+        const fileToDownload = new Blob([localStorage.getItem("saveFile")],{type:"application/json"});
+        const linkToFile = URL.createObjectURL(fileToDownload);
+        const tempElement = document.createElement("a")
+
+        tempElement.href = linkToFile;
+
+        //name of downloaded file
+        tempElement.download = "downloadtext.json";
+        document.body.appendChild(tempElement);
+
+        tempElement.click();
+
+    }
+}
+

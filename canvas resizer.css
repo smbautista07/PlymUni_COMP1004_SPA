@@ -61,10 +61,30 @@ body
     background-color: aquamarine;
     width:100%;
     height:100%;
+    transition-duration:0.2s;
+    left:0px;
+    border-width:solid black 4px;
+}
+
+#saveFileButton:hover
+{
+    transform: scale(1.1,1.1);
+}
+#saveExportButton
+{
+    box-sizing: border-box;
+    background-color: yellow;
+    transition-duration: 0.2s;
+}
+
+#saveExportButton:hover
+{
+    transform: scale(1.1,1.1);
 }
 
 #saveButtonArea:hover
 {
+    
     transform: scale(1.1,1.1);
 }
 
