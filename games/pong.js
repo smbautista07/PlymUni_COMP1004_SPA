@@ -16,6 +16,8 @@ var allPaddleSpeed = 10;
 var pauseButton;
 var lifeCounter = {};
 var startGameText
+var paddleControlText1;
+var paddleControlText2;
 var exitGameFlag;
 
 class player
@@ -60,7 +62,8 @@ function gameStart()
     rightPlayer.score = 0;
 
     startGameText = new textGameObj({text:`Press 1 for singleplayer, 2 for multiplayer. Spacebar to pause and Backquote to exit game`, x:displayHandler.gameCanvas.width/2, y:displayHandler.gameCanvas.height/4, font:"20px bold sans serif"})
-
+    paddleControlText1 = new textGameObj({text:`Left paddle: W to move up, S to move down.`, x:displayHandler.gameCanvas.width/2, y:displayHandler.gameCanvas.height/4 + 30, font:"20px bold sans serif"})
+    paddleControlText2 = new textGameObj({text:`Right paddle (if multiplayer): ArrowUp to move up, ArrowDown to move down`, x:displayHandler.gameCanvas.width/2, y:displayHandler.gameCanvas.height/4 + 60, font:"20px bold sans serif"})
     let r1 = new rectangle({height:80, width:20, isVisible:false});
     r1.y = bottomScreenY(r1)/2;
     r1.x = endScreenX(r1)/2-20;
@@ -76,7 +79,7 @@ function gameStart()
 
     gameMode = null;
     gameObjectHandler.isPaused = true;
-    
+
     gameLoopID = setInterval(gameLoop,10)
     requestAnimationFrame(displayHandler.updateDisplay);    
 }
@@ -302,6 +305,8 @@ function selectGameMode2()
 function leaveSelectionScreen()
 {
     startGameText.isVisible=false;
+    paddleControlText1.isVisible = false;
+    paddleControlText2.isVisible = false;
     pauseOrUnpause();
 }
 

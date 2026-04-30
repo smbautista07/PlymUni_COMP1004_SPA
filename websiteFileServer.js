@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { existsSync, constants, readFileSync } from "node:fs";
 import { relative } from "node:path";
+import { networkInterfaces } from "node:os";
 const port = 3000
 
 
@@ -14,7 +15,7 @@ const server = createServer((req,res) =>
     //initial get request only sends / rather than file name
     if (filePath == './')
     {
-        filePath = "./Multi-game SPA.html";
+        filePath = "./index.html";
         // filePath = "../nonProjectFile.html";
     }
     
@@ -80,5 +81,20 @@ function getFileExtension(filePath)
 }
 
 server.listen(port, () => {
-  console.log(`Example app listening. Go to  http://localhost:${port}`)
+    let i = networkInterfaces();
+    let privateAddress;
+    //Check device wifi interfaces, starting from ethernet. Provides a link for other devices connected via LAN.
+    if (i["eth0"])
+    {
+        privateAddress = i["eth0"][0]["address"];
+    }
+    else if (i["Wi-Fi"])
+    {
+        privateAddress = i["Wi-Fi"][0]["address"];
+    }
+
+    let extraText = `or http://${privateAddress}:${port} for other devices on this network`; 
+
+    console.log(`Example app listening. Go to http://localhost:${port} on this device`, extraText);
+
 })
