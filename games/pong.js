@@ -74,42 +74,11 @@ function gameStart()
     gameObjectHandler.createCollisionInteraction({gameObj1:pongBall, gameObj2:rightPlayer.paddle, collisionFunc:pongPaddleInteraction});
     inputHandler.preventDefault("Tab");
 
+    gameMode = null;
     gameObjectHandler.isPaused = true;
-    addEventListener("keydown", selectGameMode);
-    gameLoopID = setInterval(gameLoop,10); 
+    
+    gameLoopID = setInterval(gameLoop,10)
     requestAnimationFrame(displayHandler.updateDisplay);    
-}
-
-function selectGameMode(event)
-{
-    //Single player option
-    switch (event.code)
-    {
-        case "Digit1":
-            gameMode = "Singleplayer";
-            leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/2, y:150});
-            lifeCounter.lives = 3;
-            lifeCounter.display = new textGameObj({text:`Lives:${lifeCounter.lives}`, x:displayHandler.gameCanvas.width/2, y:50, font:"40px bold sans serif"});
-        break;
-        case "Digit2":
-            gameMode = "Multiplayer";
-            leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:150});
-            rightPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:150});
-        break;
-        case "Backquote":
-            exitGame();
-        break;
-        default:
-            console.error("Invalid game mode picker key");
-    }
-    if (gameMode) 
-    {
-        startGameText.isVisible=false;
-        gameObjectHandler.isPaused = false;
-        removeEventListener("keydown", selectGameMode);
-        
-        
-    }
 }
 
 function resetPongball()
@@ -269,7 +238,7 @@ function paddleScreenEdgeInteraction(gameObj)
     }
 }
 
-function startOrStop()
+function pauseOrUnpause()
 {
     if (!gameMode)
     {
@@ -293,6 +262,51 @@ function startOrStop()
 function gameLoop()
 {    
     inputHandler.updateKeysThisFrame();
+
+    if (gameMode)
+    {
+        activeGameActions()
+    }
+    else
+    {
+        selectGameMode2()
+    }
+    
+
+    if (inputHandler.getKeyDown("Backquote"))
+    {
+        clearInterval(gameLoopID);
+        exitGame();
+    }
+}
+
+function selectGameMode2()
+{
+    if (inputHandler.getKeyDown("Digit1"))
+    {
+        gameMode = "Singleplayer";
+        leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/2, y:150});
+        lifeCounter.lives = 3;
+        lifeCounter.display = new textGameObj({text:`Lives:${lifeCounter.lives}`, x:displayHandler.gameCanvas.width/2, y:50, font:"40px bold sans serif"});
+        leaveSelectionScreen();
+    }
+    if (inputHandler.getKeyDown("Digit2"))
+    {
+        gameMode = "Multiplayer";
+        leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:150});
+        rightPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:150});
+        leaveSelectionScreen();
+    }
+}
+
+function leaveSelectionScreen()
+{
+    startGameText.isVisible=false;
+    pauseOrUnpause();
+}
+
+function activeGameActions()
+{
     checkPlayerInputs(leftPlayer);
     if (gameMode == "Singleplayer")
     {
@@ -305,7 +319,7 @@ function gameLoop()
 
     if (inputHandler.getKeyDown('Space'))
     {
-        startOrStop();
+        pauseOrUnpause();
     }
 
     gameObjectHandler.positionUpdateAll();
@@ -313,14 +327,6 @@ function gameLoop()
     paddleScreenEdgeInteraction(leftPlayer.paddle);
     paddleScreenEdgeInteraction(rightPlayer.paddle);
     gameObjectHandler.checkCollisionInteractions();
-
-    if (inputHandler.getKeyDown("Backquote"))
-    {
-        clearInterval(gameLoopID);
-        exitGame();
-    }
-
-
 }
 
 function checkPlayerInputs(player)

@@ -163,8 +163,8 @@ class inputHandler
     static preventDefaultKeyAction = new Set();
     
     static keyCurrentStates = new Set();
-    static keysThisFrame;
-    static keysLastFrame;
+    static keysThisFrame = new Set();
+    static keysLastFrame = new Set();
 
     static setup()
     {
@@ -174,7 +174,7 @@ class inputHandler
 
     static cease()
     {
-        //Clears any data related to inputs
+        //Clears any data related to inputs found when needing to press the exit button twice for it to have an effect.
         inputHandler.keyCurrentStates.clear();
         inputHandler.keysThisFrame.clear();
         inputHandler.keysLastFrame.clear();
