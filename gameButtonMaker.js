@@ -4,7 +4,7 @@
 const gamePaths =
 {
     pong:"./games/pong.js",
-    test:"./games/test.js"
+    emptyGame:"./games/emptyGame.js"
 }
 
 
@@ -52,5 +52,5 @@ function hideGameButtons()
 
 function hideElement(elem)
 {
-    elem.style.display = "none";
+    elem.style.visibility = "hidden";
 }

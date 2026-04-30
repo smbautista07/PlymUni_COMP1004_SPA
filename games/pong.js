@@ -15,6 +15,8 @@ var rightPlayer;
 var allPaddleSpeed = 10;
 var pauseButton;
 var lifeCounter = {};
+var startGameText
+var exitGameFlag;
 
 class player
 {
@@ -28,7 +30,7 @@ class player
 
 function gameStart()
 {
-
+    exitGameFlag = false;
     displayHandler.createDisplay({width:960, height:540});    
     inputHandler.setup();
 
@@ -43,6 +45,8 @@ function gameStart()
         up:"KeyW",
         down:"KeyS"
     };
+    leftPlayer.scoreBoard
+    leftPlayer.score = 0;
 
     rightPlayer = new player();
     rightPlayer.paddle = new rectangle({height:100, width:20});
@@ -53,8 +57,9 @@ function gameStart()
         up:"ArrowUp",
         down:"ArrowDown"
     }
+    rightPlayer.score = 0;
 
-    
+    startGameText = new textGameObj({text:`Press 1 for singleplayer, 2 for multiplayer. Spacebar to pause and Backquote to exit game`, x:displayHandler.gameCanvas.width/2, y:displayHandler.gameCanvas.height/4, font:"20px bold sans serif"})
 
     let r1 = new rectangle({height:80, width:20, isVisible:false});
     r1.y = bottomScreenY(r1)/2;
@@ -85,18 +90,21 @@ function selectGameMode(event)
             leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/2, y:150});
             lifeCounter.lives = 3;
             lifeCounter.display = new textGameObj({text:`Lives:${lifeCounter.lives}`, x:displayHandler.gameCanvas.width/2, y:50, font:"40px bold sans serif"});
-            console.log(lifeCounter.lives);
         break;
         case "Digit2":
             gameMode = "Multiplayer";
             leftPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width/3, y:150});
             rightPlayer.scoreBoard = new textGameObj({text:0, x:displayHandler.gameCanvas.width*2/3, y:150});
         break;
+        case "Backquote":
+            exitGame();
+        break;
         default:
-        console.log("Not an option");
+            console.error("Invalid game mode picker key");
     }
     if (gameMode) 
     {
+        startGameText.isVisible=false;
         gameObjectHandler.isPaused = false;
         removeEventListener("keydown", selectGameMode);
         
@@ -149,13 +157,13 @@ function pongPaddleInteraction(pongBall, currentPaddle)
 function revertOverlap(pongBall, currentPaddle)
 {   
     var currentDirectionX = (pongBall.speedX >= 0) ? "right":"left";
+    //handle the overlap depending on which direction the ball is travelling.
     var overlapX = (currentDirectionX == "right") ? pongBall.x + pongBall.width - currentPaddle.x : pongBall.x - (currentPaddle.x + currentPaddle.width);
     var overlapTimeX = overlapX / pongBall.speedX;
 
     var currentDirectionY = (pongBall.speedY >= 0) ? "down":"up";
 
     var overlapY = (currentDirectionY == "down") ? pongBall.y + pongBall.height - currentPaddle.y : pongBall.y - (currentPaddle.y + currentPaddle.height);
-    console.log(overlapY);
 
     var overlapTimeY = overlapY / pongBall.speedY;
 
@@ -187,7 +195,17 @@ function bounce(pongBall, currentPaddle, dimension)
 
     if (dimension == "y")
     {
-        pongBall.speedY += currentPaddle.speedY;
+        pongBall.speedY *= -1;
+        if (Math.abs(pongBall.speedY+currentPaddle.speedY) > Math.abs(pongBall.speedY-currentPaddle.speedY))
+        {
+            pongBall.speedY = pongBall.speedY+currentPaddle.speedY;
+        }
+        else
+        {
+            pongBall.speedY = pongBall.speedY-currentPaddle.speedY;
+        }
+        
+        
     }
 }
 
@@ -196,6 +214,7 @@ function pongBallEdgeInteraction()
     if (pongBall.x < 0)
     {
         resetPongball();
+
         if (gameMode == "Singleplayer")
         {
             if (lifeCounter.lives > 1)
@@ -211,13 +230,14 @@ function pongBallEdgeInteraction()
         }
         else if (gameMode == "Multiplayer")
         {
-            rightPlayer.scoreBoard.text++;
+            incrementScore(rightPlayer);
         }
     }
+
     if (pongBall.x+pongBall.width > displayHandler.gameCanvas.width)
     {
         resetPongball();
-        leftPlayer.scoreBoard.text++;
+        incrementScore(leftPlayer);
     }
     if (pongBall.y < 0)
     {
@@ -229,6 +249,12 @@ function pongBallEdgeInteraction()
         pongBall.y = displayHandler.gameCanvas.height - pongBall.height;
         pongBall.speedY *=-1;
     }
+}
+
+function incrementScore(player)
+{
+    player.score++;
+    player.scoreBoard.text = player.score;
 }
 
 function paddleScreenEdgeInteraction(gameObj)
@@ -267,7 +293,6 @@ function startOrStop()
 function gameLoop()
 {    
     inputHandler.updateKeysThisFrame();
-
     checkPlayerInputs(leftPlayer);
     if (gameMode == "Singleplayer")
     {
@@ -288,6 +313,13 @@ function gameLoop()
     paddleScreenEdgeInteraction(leftPlayer.paddle);
     paddleScreenEdgeInteraction(rightPlayer.paddle);
     gameObjectHandler.checkCollisionInteractions();
+
+    if (inputHandler.getKeyDown("Backquote"))
+    {
+        clearInterval(gameLoopID);
+        exitGame();
+    }
+
 
 }
 
@@ -310,6 +342,9 @@ function checkPlayerInputs(player)
     {
         p.paddle.speedY += -allPaddleSpeed;
     }
+
+    
+
 }
 
 function botAction()
@@ -338,45 +373,51 @@ function endGame()
 {
     gameObjectHandler.gameObjects.clear();
     gameObjectHandler.collisionInteractions.clear();
+    displayHandler.clearDisplay();
     var exampleScores = loadPongScores();
+    
+    var scoreIndex = checkScoreBoard(leftPlayer.score, exampleScores);
 
-    updateScoreBoard(leftPlayer.scoreBoard.text, exampleScores);
+    if (scoreIndex < 10)
+    {
+        let name = null;
+        updateScoreBoard(leftPlayer.score, exampleScores, scoreIndex, name);
+    }
+    
 
     displayScores();
 
 }
 
-function updateScoreBoard(score, scoreEntries)
+//returns appropriate index for score on scoreboard
+function checkScoreBoard(score, scoreEntries)
 {
-    for (let index = scoreEntries.length-1; index >= 0; index--)
+    //if scoreboard is empty
+    if (scoreEntries.length == 0)
     {
-        //If this score is greater than the part of the list, move to next
+        return 0;
+    }
+    
+    for (var index = 0; index < scoreEntries.length; index++)
+    {
+        //array is in descending order, so as soon as an element with a smaller value is found, place it there.
         if (score > scoreEntries[index].score)
         {
-            continue;
-        }
-        //its less, place it infront of the compared element
-        else
-        {
-            console.log(scoreEntries[index].score,">",score);
-            let nam="Bill";
-            //Get array of scores greater than the one set
-            let greaterScores = scoreEntries.slice(0,index+1);
-
-            //Get array of values less than this value
-            let lesserScores = scoreEntries.slice(index+1, scoreEntries.length);
-
-            let newArray = [];
-            newArray = newArray.concat(greaterScores).concat({name:nam, score:score}).concat(lesserScores);
-            //return array with value inserted
-            console.log(lesserScores);
-            
-            newArray =  newArray.slice(0,10);
-            console.log(newArray);
-            saveScores(newArray);
             break;
         }
     }
+
+    return index;
+}
+
+function updateScoreBoard(newScore, scoreEntries, scoreIndex, name)
+{
+    //Add score to list and increase index of lower scores
+    scoreEntries.splice(scoreIndex, 0, {name:"", score:newScore});
+    //Save top 10 scores
+    saveScores(scoreEntries.slice(0,10));
+    
+    
 }
 
 function saveScores(scoreEntries)
@@ -397,7 +438,13 @@ function loadSaveFile()
 
 function loadPongScores()
 {
-    return loadSaveFile().pong;
+    let saveFile = loadSaveFile()
+    if (!Object.hasOwn(saveFile, "pong"))
+    {
+        saveFile.pong = [];
+    }
+    return saveFile.pong;
+    
 }
 
 
@@ -408,10 +455,14 @@ function displayScores()
     let startingHeight = displayHandler.gameCanvas.height/4;
     let iterations = 0;
     let lineHeight = 40;
-    new textGameObj({text:`Top Scores:`, x:displayHandler.gameCanvas.width/2, y:displayHandler.gameCanvas.height/6, font:"50px bold sans serif"});
+    new textGameObj({text:`Top 10 Scores:`, x:displayHandler.gameCanvas.width/2, y:displayHandler.gameCanvas.height/6, font:"50px bold sans serif"});
     scoreArray.forEach((entry) =>
     {
-        new textGameObj({text:`${entry.name}:${entry.score}`, x:displayHandler.gameCanvas.width/2, y:startingHeight+iterations*lineHeight, font:"30px bold sans serif"});
+        if (entry.name)
+        {
+            entry.name += ":";
+        }
+        new textGameObj({text:`${entry.name}${entry.score}`, x:displayHandler.gameCanvas.width/2, y:startingHeight+iterations*lineHeight, font:"30px bold sans serif"});
         iterations += 1;
     });
 }
@@ -420,8 +471,14 @@ function exitGame()
 {
     gameObjectHandler.gameObjects.clear();
     gameObjectHandler.collisionInteractions.clear();
+    inputHandler.cease();
     displayHandler.deleteDisplay();
-    clearInterval(gameLoopID);
+    let b = document.getElementsByClassName("gameButton");
+    rightPlayer = "";
+    leftPlayer = "";
+
+    Array.from(b).forEach((currentButton)=>{currentButton.style.visibility = "visible";});
 }
+
 
 export {gameStart, exitGame};

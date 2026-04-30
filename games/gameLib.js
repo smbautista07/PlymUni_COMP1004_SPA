@@ -65,6 +65,7 @@ class displayHandler
     static deleteDisplay()
     {
         document.body.removeChild(displayHandler.gameCanvas);
+        displayHandler.gameCanvas = "";
     }
 }
 
@@ -162,8 +163,8 @@ class inputHandler
     static preventDefaultKeyAction = new Set();
     
     static keyCurrentStates = new Set();
-    static keysThisFrame = new Set();
-    static keysLastFrame = new Set();
+    static keysThisFrame;
+    static keysLastFrame;
 
     static setup()
     {
@@ -171,6 +172,17 @@ class inputHandler
         document.addEventListener("keyup", inputHandler.removeKeyState);
     }
 
+    static cease()
+    {
+        //Clears any data related to inputs
+        inputHandler.keyCurrentStates.clear();
+        inputHandler.keysThisFrame.clear();
+        inputHandler.keysLastFrame.clear();
+
+        document.removeEventListener("keydown", inputHandler.addKeyState);
+        document.removeEventListener("keyup", inputHandler.removeKeyState);
+    }
+    
     static updateKeysThisFrame()
     {
         inputHandler.keysLastFrame = new Set(inputHandler.keysThisFrame);
@@ -181,7 +193,7 @@ class inputHandler
     {
         let isCurrentInput = inputHandler.keysThisFrame.has(key);
         let isPreviousInput = inputHandler.keysLastFrame.has(key);
-
+        
         if (isCurrentInput && !isPreviousInput)
         {
             return true;
@@ -202,7 +214,7 @@ class inputHandler
     }
 
     static addKeyState(event)
-    {
+    {        
         inputHandler.keyCurrentStates.add(event.code);
         if (inputHandler.preventDefaultKeyAction.has(event.code))
         {
@@ -214,7 +226,7 @@ class inputHandler
     {
         inputHandler.keyCurrentStates.delete(event.code);
     }
-
+    
     static preventDefault(key)
     {
         inputHandler.preventDefaultKeyAction.add(key);
